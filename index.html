@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nação de Impacto - FJU</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        /* ========== CORES OFICIAIS FJU ========== */
+        :root {
+            --fju-azul-escuro: #002D62;
+            --fju-azul-claro: #0055A4;
+            --fju-vermelho: #E30613;
+            --fju-amarelo: #FFD100;
+            --fju-branco: #FFFFFF;
+            --fju-fundo: #F4F7F6;
+        }
+
+        body { background: var(--fju-azul-escuro); min-height: 100vh; display: flex; justify-content: center; }
+        
+        .container { 
+            background: var(--fju-fundo); 
+            max-width: 600px; 
+            width: 100%; 
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); 
+            padding-bottom: 40px;
+        }
+
+        /* ========== BANNER & HEADER ========== */
+        .banner-topo { width: 100%; max-height: 180px; object-fit: cover; display: none; }
+        
+        .header { 
+            background: linear-gradient(135deg, var(--fju-azul-escuro), var(--fju-azul-claro)); 
+            text-align: center; padding: 25px 15px 20px; 
+            border-bottom: 4px solid var(--fju-vermelho);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            margin-bottom: 20px;
+            color: var(--fju-branco);
+        }
+        .header h1 { font-size: 1.8em; font-weight: 800; letter-spacing: 1px; margin-bottom: 5px; }
+        .header h1 .highlight { color: var(--fju-amarelo); }
+        .logo-fju { 
+            display: inline-block; background: var(--fju-branco); color: var(--fju-azul-escuro);
+            padding: 4px 15px; border-radius: 15px; font-weight: 900; font-size: 1.1em; letter-spacing: 2px;
+            border: 2px solid var(--fju-vermelho); margin-top: 5px;
+        }
+        .logo-fju .u { color: var(--fju-vermelho); }
+
+        /* ========== CLASSES UTILITÁRIAS ========== */
+        .btn-base { border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: transform 0.2s; font-size: 0.9em; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; }
+        .btn-base:active { transform: scale(0.97); }
+        .btn-azul { background: var(--fju-azul-claro); color: var(--fju-branco); }
+        .btn-vermelho { background: var(--fju-vermelho); color: var(--fju-branco); }
+        .btn-amarelo { background: var(--fju-amarelo); color: #000; }
+        .btn-verde { background: #25D366; color: var(--fju-branco); }
+        .btn-cinza { background: #555; color: var(--fju-branco); }
+
+        /* ========== PAINEL DE CONTROLE ========== */
+        .painel-gerenciamento { background: #E8F0FE; border-radius: 12px; margin: 15px; border: 2px solid var(--fju-azul-claro); overflow: hidden; }
+        .painel-header { background: var(--fju-azul-escuro); padding: 15px; display: flex; justify-content: space-between; color: white; font-weight: bold; cursor: pointer; }
+        .painel-conteudo { display: none; padding: 15px; }
+        .painel-conteudo.aberto { display: block; }
+        
+        .painel-login { display: flex; gap: 10px; margin-bottom: 15px; }
+        .painel-login input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
+        
+        .config-grupo { background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px; border: 1px solid #ddd; }
+        .config-grupo h4 { color: var(--fju-azul-escuro); margin-bottom: 10px; border-bottom: 2px solid #eee; padding-bottom: 5px; font-size: 1em; }
+        .config-item { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+        .config-item label { font-size: 0.85em; font-weight: bold; color: #555; }
+        .config-item input, .config-item select { padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
+
+        .card-tribo-edit { background: #fafafa; border: 1px solid #ddd; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+        .card-tribo-edit img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--fju-azul-claro); }
+        .tribo-edit-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+
+        /* ========== FORMULÁRIO DE LANÇAMENTO ========== */
+        .card-lancamento { background: white; border-radius: 15px; padding: 20px; margin: 0 15px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 4px solid var(--fju-azul-claro); }
+        .card-lancamento label { display: block; font-weight: 700; color: var(--fju-azul-escuro); margin-bottom: 8px; font-size: 0.95em; }
+        .input-group { margin-bottom: 15px; }
+        .input-group select, .input-group input[type="date"], .input-group input[type="number"] { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; background: #fafafa; color: var(--fju-azul-escuro); font-weight: 600; }
+        .input-group select:focus { border-color: var(--fju-azul-claro); outline: none; }
+        
+        .grid-atalhos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .btn-atalho { background: #f0f0f0; border: 2px solid #ddd; padding: 12px 5px; border-radius: 8px; font-weight: 700; color: var(--fju-azul-escuro); font-size: 0.9em; transition: all 0.2s; }
+        .btn-atalho.active { background: var(--fju-azul-claro); color: white; border-color: var(--fju-azul-escuro); transform: scale(1.05); }
+
+        /* ========== ABAS E TOTAIS ========== */
+        .tabs-semanas { display: flex; gap: 10px; overflow-x: auto; padding: 5px 15px 15px; scrollbar-width: none; }
+        .tabs-semanas::-webkit-scrollbar { display: none; }
+        .tab-btn { background: #ddd; border: none; padding: 10px 20px; border-radius: 20px; font-weight: 700; color: #555; white-space: nowrap; transition: 0.3s; }
+        .tab-btn.active { background: var(--fju-vermelho); color: white; box-shadow: 0 4px 10px rgba(227,6,19,0.3); }
+
+        .total-section { background: linear-gradient(135deg, var(--fju-azul-escuro), var(--fju-azul-claro)); border-radius: 15px; padding: 20px; margin: 0 15px 20px; color: white; box-shadow: 0 10px 20px rgba(0,45,98,0.2); }
+        .total-section h2 { text-align: center; margin-bottom: 15px; font-size: 1.4em; }
+        .total-grid { display: flex; flex-direction: column; gap: 10px; }
+        .total-item { background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--fju-amarelo); }
+        .total-item .nome-tribo { font-size: 1.1em; font-weight: bold; display: flex; align-items: center; gap: 12px; }
+        .total-item .lider-tribo { font-size: 0.75em; color: rgba(255,255,255,0.7); font-weight: normal; margin-top: 3px; }
+        .total-item .img-wrapper { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; overflow: hidden; flex-shrink: 0; }
+        .total-item .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .total-item .pontos-tribo { text-align: right; }
+        .pts-destaque { font-size: 1.4em; font-weight: 900; color: var(--fju-amarelo); }
+        .pts-sub { font-size: 0.8em; color: rgba(255,255,255,0.7); margin-top: 2px; }
+
+        .total-geral { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 2px solid rgba(255,255,255,0.2); }
+        .total-geral .label { font-size: 1em; color: #8ab4f8; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+        .total-geral .valor { font-size: 2.8em; font-weight: 900; color: var(--fju-amarelo); line-height: 1.1; margin: 5px 0; }
+
+        .botoes-acoes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+
+        /* ========== HISTÓRICO ========== */
+        .historico-section { margin: 0 15px; }
+        .historico-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .historico-header h3 { color: var(--fju-azul-escuro); font-size: 1.2em; }
+        .lista-tribos { display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; }
+        .tribo-card { background: white; border-radius: 10px; padding: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--fju-azul-claro); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .tribo-card .info .nome { font-weight: 700; color: var(--fju-azul-escuro); font-size: 1em; }
+        .tribo-card .info .detalhe { font-size: 0.75em; color: #777; margin-top: 3px; display: flex; gap: 5px; flex-wrap: wrap; }
+        .badge-semana { background: #eee; padding: 2px 6px; border-radius: 4px; color: #333; font-weight: bold; }
+        .tribo-card .acoes { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+        .tribo-card .pontos { font-weight: 900; color: var(--fju-azul-claro); font-size: 1.1em; }
+        .btn-mini { background: #eee; border: none; padding: 5px 10px; border-radius: 5px; font-size: 0.8em; font-weight: bold; }
+        
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--fju-azul-escuro); color: white; padding: 15px 30px; border-radius: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 9999; display: none; font-weight: bold; white-space: nowrap; }
+        .toast.ativo { display: block; animation: popUp 0.3s ease; }
+        @keyframes popUp { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="toast" id="toast"><span id="toastMessage">Sucesso!</span></div>
+
+        <img id="appBanner" class="banner-topo" src="" alt="Banner da Nação">
+
+        <div class="header" id="appHeader">
+            <h1><span id="headerTitulo">Nação de Impacto</span> <span class="highlight">•</span> <span id="headerFJU">FJU</span></h1>
+            <div style="font-size:0.9em; opacity:0.9; margin-bottom: 10px;">Controle de Pontuação Semanal</div>
+            <div class="logo-fju">FJ<span class="u">U</span> <span id="headerSimbolo">⚡</span></div>
+        </div>
+
+        <div class="painel-gerenciamento">
+            <div class="painel-header" onclick="togglePainel()">
+                <span>⚙️ Configurações (Liderança)</span>
+                <span id="iconeToggle">▼</span>
+            </div>
+            <div class="painel-conteudo" id="painelConteudo">
+                
+                <div class="painel-login" id="painelLogin">
+                    <input type="password" id="senhaPainel" placeholder="Senha..." onkeydown="if(event.key==='Enter') verificarSenha()">
+                    <button class="btn-base btn-azul" style="width:auto;" onclick="verificarSenha()">🔓 Entrar</button>
+                </div>
+
+                <div id="areaConfiguracoes" style="display: none;">
+                    <div class="config-grupo">
+                        <h4>👑 Tribos (Nome, Cabeça, Foto e Emoji)</h4>
+                        <div id="cfgTribosList"></div>
+                    </div>
+
+                    <div class="config-grupo">
+                        <h4>🖼️ Identidade Visual e Tema</h4>
+                        <div class="config-item"><label>Nome da Nação:</label><input type="text" id="cfgNacao"></div>
+                        <div class="config-item"><label>Tema da Semana:</label><input type="text" id="cfgTema"></div>
+                        <div class="config-item">
+                            <label>Banner Principal (Topo do Site):</label>
+                            <input type="file" accept="image/*" onchange="uploadBannerPrincipal(this)">
+                        </div>
+                        <div class="config-item">
+                            <label>Fundo do WhatsApp (Arte do Tema):</label>
+                            <input type="file" accept="image/*" onchange="uploadArteTema(this)">
+                        </div>
+                    </div>
+
+                    <div class="config-grupo">
+                        <h4>📅 Semanas do Rally</h4>
+                        <div class="config-item">
+                            <label>Semanas (separe por vírgula):</label>
+                            <input type="text" id="cfgSemanas" placeholder="Ex: 1ª Semana, 2ª Semana...">
+                        </div>
+                        <div class="config-item"><label>Data Início:</label><input type="date" id="cfgInicio"></div>
+                        <div class="config-item"><label>Data Fim:</label><input type="date" id="cfgFim"></div>
+                    </div>
+                    <button class="btn-base btn-azul" onclick="salvarConfiguracoes()">💾 Salvar e Fechar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-lancamento">
+            <div style="display:flex; gap:10px;">
+                <div class="input-group" style="flex:1;"><label>📅 Data</label><input type="date" id="data"></div>
+                <div class="input-group" style="flex:1;"><label>🗓️ Semana</label><select id="semana"></select></div>
+            </div>
+            
+            <div class="input-group">
+                <label>👑 Selecione a Tribo</label>
+                <select id="tribo"></select>
+            </div>
+
+            <div class="input-group">
+                <label>⭐ Pontuação</label>
+                <div class="grid-atalhos">
+                    <button class="btn-atalho active" onclick="setPontos(100000, this)">100k</button>
+                    <button class="btn-atalho" onclick="setPontos(50000, this)">50k</button>
+                    <button class="btn-atalho" onclick="setPontos(10000, this)">10k</button>
+                    <button class="btn-atalho" onclick="setPontos(5000, this)">5k</button>
+                    <button class="btn-atalho" onclick="setPontos(1000, this)">1k</button>
+                    <button class="btn-atalho" onclick="setPontos('outro', this)">Outro ✏️</button>
+                </div>
+                <input type="number" id="pontosInput" placeholder="Digite o valor exato..." style="display:none; margin-top: 10px;">
+            </div>
+            
+            <button class="btn-base btn-azul" style="font-size: 1.1em; padding: 15px;" onclick="adicionarPontos()">➕ Lançar Pontos</button>
+        </div>
+
+        <div class="tabs-semanas" id="tabsSemanas"></div>
+
+        <div class="total-section">
+            <h2 id="tituloPlacar">🏆 Placar Consolidado</h2>
+            <div class="total-grid" id="totalGrid"></div>
+            
+            <div class="total-geral" id="totalGeral"></div>
+            
+            <div style="margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px;">
+                <div style="text-align: center; margin-bottom: 10px; font-size: 0.8em; opacity: 0.8;">AÇÕES E RELATÓRIOS (MOBILE)</div>
+                
+                <div class="botoes-acoes" style="margin-top: 0;">
+                    <button class="btn-base btn-verde" onclick="copiarTexto()">💬 Resumo Rápido</button>
+                    <button class="btn-base btn-amarelo" onclick="gerarImagem()" id="btnImg">🖼️ Gerar Imagem</button>
+                </div>
+                
+                <div class="botoes-acoes">
+                    <button class="btn-base btn-azul" onclick="copiarRelatorioCompleto()">📋 Relatório (Zap)</button>
+                    <button class="btn-base btn-verde" style="background:#217346" onclick="exportarRelatorioCSV()">📊 Baixar Excel</button>
+                </div>
+
+                <div class="botoes-acoes">
+                    <button class="btn-base btn-cinza" onclick="salvarDadosJSON()">💾 Backup Site</button>
+                    <button class="btn-base btn-vermelho" onclick="resetarTudo()">🗑️ Limpar Tudo</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="historico-section">
+            <div class="historico-header">
+                <h3>📋 Últimos Lançamentos</h3>
+                <span class="badge-semana" id="qtdHistorico">0</span>
+            </div>
+            <div class="lista-tribos" id="listaTribos"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração Padrão Inicial
+        let CONFIG = {
+            tribos: [
+                { id: 't1', nome: 'Judá', lider: '', emoji: '🦁', cor: '#FFD100' },
+                { id: 't2', nome: 'Aser', lider: '', emoji: '🐟', cor: '#E30613' },
+                { id: 't3', nome: 'Zebulom', lider: '', emoji: '🌿', cor: '#0055A4' }
+            ],
+            semanas: ['1ª Semana', '2ª Semana', '3ª Semana', '4ª Semana', '5ª Semana'],
+            dataInicio: '2026-07-01', dataFim: '2026-08-02', tituloNacao: 'Nação de Impacto', tituloFJU: 'FJU', simboloFJU: '⚡', tema: 'Série: O Bom Soldado'
+        };
+
+        let dados = [], idC = 0, semanaAtiva = 'Geral', ptsSelecionados = 100000;
+        let arteUrl = '', bannerMainUrl = '';
+        let fotosTribos = {};
+
+        // Init e LocalStorage
+        function init() {
+            try {
+                const slv = JSON.parse(localStorage.getItem('fjuDataV3'));
+                if (slv) { 
+                    dados = slv.dados || []; idC = slv.idC || 0; 
+                    CONFIG = Object.assign(CONFIG, slv.CONFIG); 
+                    fotosTribos = slv.fotosTribos || {};
+                    arteUrl = slv.arteUrl || '';
+                    bannerMainUrl = slv.bannerMainUrl || '';
+                }
+            } catch (e) {}
+            
+            document.getElementById('data').value = new Date().toISOString().slice(0,10);
+            renderAbas();
+            atualizarTela();
+        }
+
+        function salvarDB() {
+            try { localStorage.setItem('fjuDataV3', JSON.stringify({dados, idC, CONFIG, fotosTribos, arteUrl, bannerMainUrl})); } 
+            catch(e) { mostrarToast('⚠️ Imagem pesada! Tente não colocar fotos gigantes.', '⚠️'); }
+        }
+
+        function mostrarToast(msg, em='✅') {
+            const t = document.getElementById('toast'); t.innerHTML = `${em} ${msg}`;
+            t.classList.add('ativo'); setTimeout(() => t.classList.remove('ativo'), 3000);
+        }
+
+        // ================= COMPARTILHAMENTO INTELIGENTE MOBILE =================
+        // Se o celular suportar a janela nativa de compartilhamento, usamos ela. Se não, usamos clipboard.
+        async function compartilharViaCelular(texto) {
+            if (navigator.share) {
+                try {
+                    await navigator.share({ text: texto });
+                    return true;
+                } catch (e) {
+                    console.log("Compartilhamento nativo cancelado");
+                }
+            }
+            // Fallback (PC ou se falhar)
+            try {
+                await navigator.clipboard.writeText(texto);
+                mostrarToast('Texto copiado!', '📱');
+            } catch (e) {
+                mostrarToast('Erro ao copiar.', '❌');
+            }
+        }
+
+        // Janela de Fallback para Imagem no Celular
+        function mostrarModalImagem(dataUrl) {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;';
+            modal.innerHTML = `
+                <p style="color:var(--fju-amarelo); font-size:1.1em; text-align:center; font-weight:bold; margin-bottom:15px; line-height:1.4;">
+                    👆 TOQUE E SEGURE na imagem para<br>Copiar ou Enviar pro WhatsApp
+                </p>
+                <img src="${dataUrl}" style="max-width:100%; max-height:70vh; border-radius:10px; box-shadow:0 0 20px rgba(255,209,0,0.4);">
+                <button onclick="this.parentElement.remove()" style="margin-top:25px; padding:15px 30px; border:none; border-radius:10px; background:var(--fju-vermelho); color:white; font-weight:bold; font-size:1.1em; cursor:pointer; width:80%;">Voltar ao Painel</button>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // ================= PAINEL DE LIDERANÇA =================
+        let painelAberto = false, painelDesbloqueado = false;
+        
+        function togglePainel() {
+            painelAberto = !painelAberto;
+            document.getElementById('painelConteudo').classList.toggle('aberto', painelAberto);
+            document.getElementById('iconeToggle').textContent = painelAberto ? '▲' : '▼';
+        }
+
+        function verificarSenha() {
+            if (document.getElementById('senhaPainel').value === 'fju2026') {
+                painelDesbloqueado = true;
+                document.getElementById('painelLogin').style.display = 'none';
+                document.getElementById('areaConfiguracoes').style.display = 'block';
+                renderConfigPainel();
+                mostrarToast('Painel Desbloqueado!', '🔓');
+            } else {
+                mostrarToast('Senha incorreta!', '❌');
+            }
+        }
+
+        function renderConfigPainel() {
+            document.getElementById('cfgNacao').value = CONFIG.tituloNacao;
+            document.getElementById('cfgTema').value = CONFIG.tema;
+            document.getElementById('cfgSemanas').value = CONFIG.semanas.join(', ');
+            document.getElementById('cfgInicio').value = CONFIG.dataInicio;
+            document.getElementById('cfgFim').value = CONFIG.dataFim;
+
+            document.getElementById('cfgTribosList').innerHTML = CONFIG.tribos.map(t => {
+                const foto = fotosTribos[t.id] || '';
+                const imgDisplay = foto ? `<img src="${foto}">` : `<div style="width:50px;height:50px;border-radius:50%;background:${t.cor};display:flex;align-items:center;justify-content:center;font-size:24px;border:2px solid #ccc;">${t.emoji}</div>`;
+                return `
+                <div class="card-tribo-edit">
+                    <div class="tribo-edit-header">
+                        ${imgDisplay}
+                        <input type="file" accept="image/*" onchange="uploadFotoTribo('${t.id}', this)" style="font-size:0.8em; flex:1;">
+                    </div>
+                    <div style="display:flex; gap:5px; margin-bottom:5px;">
+                        <input type="text" id="cfgNome_${t.id}" value="${t.nome}" placeholder="Nome" style="flex:2; padding:8px;">
+                        <input type="text" id="cfgEmoji_${t.id}" value="${t.emoji}" placeholder="Emoji" style="flex:1; padding:8px; text-align:center;">
+                    </div>
+                    <input type="text" id="cfgLider_${t.id}" value="${t.lider||''}" placeholder="Nome do Cabeça da Tribo" style="width:100%; padding:8px; margin-bottom:5px;">
+                    <button class="btn-base btn-amarelo" style="padding:6px; font-size:0.8em;" onclick="salvarTribo('${t.id}')">💾 Salvar Alteração na Tribo</button>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function salvarTribo(id) {
+            const t = CONFIG.tribos.find(x => x.id === id);
+            if(t) {
+                t.nome = document.getElementById(`cfgNome_${id}`).value || t.nome;
+                t.lider = document.getElementById(`cfgLider_${id}`).value || '';
+                t.emoji = document.getElementById(`cfgEmoji_${id}`).value || '📌';
+                salvarDB(); atualizarTela(); renderConfigPainel();
+                mostrarToast('Tribo salva com sucesso!');
+            }
+        }
+
+        function uploadFotoTribo(id, input) {
+            const file = input.files[0]; if(!file) return;
+            const reader = new FileReader();
+            reader.onload = e => { fotosTribos[id] = e.target.result; salvarDB(); renderConfigPainel(); atualizarTela(); mostrarToast('Foto da tribo carregada!'); };
+            reader.readAsDataURL(file);
+        }
+
+        function uploadBannerPrincipal(input) {
+            const file = input.files[0]; if(!file) return;
+            const reader = new FileReader();
+            reader.onload = e => { bannerMainUrl = e.target.result; salvarDB(); atualizarTela(); mostrarToast('Banner Principal salvo!'); };
+            reader.readAsDataURL(file);
+        }
+
+        function uploadArteTema(input) {
+            const file = input.files[0]; if(!file) return;
+            const reader = new FileReader();
+            reader.onload = e => { arteUrl = e.target.result; salvarDB(); mostrarToast('Fundo WhatsApp salvo!'); };
+            reader.readAsDataURL(file);
+        }
+
+        function salvarConfiguracoes() {
+            CONFIG.tituloNacao = document.getElementById('cfgNacao').value || 'Nação de Impacto';
+            CONFIG.tema = document.getElementById('cfgTema').value;
+            CONFIG.dataInicio = document.getElementById('cfgInicio').value;
+            CONFIG.dataFim = document.getElementById('cfgFim').value;
+            const semStr = document.getElementById('cfgSemanas').value;
+            CONFIG.semanas = semStr.split(',').map(s=>s.trim()).filter(s=>s);
+            if(CONFIG.semanas.length===0) CONFIG.semanas=['1ª Semana'];
+            
+            salvarDB(); 
+            painelAberto = false; document.getElementById('painelConteudo').classList.remove('aberto'); document.getElementById('iconeToggle').textContent = '▼';
+            renderAbas(); atualizarTela(); mostrarToast('Configurações Salvas!');
+        }
+
+        function resetarTudo() {
+            if(confirm('Zerar toda a pontuação e histórico? (Isso não apaga fotos ou nomes configurados)')) { 
+                dados = []; salvarDB(); atualizarTela(); mostrarToast('Placar Zerado!'); 
+            }
+        }
+
+        // ================= FUNÇÕES DE UX =================
+        function fmtStr(n) { return n.toLocaleString('pt-BR'); }
+        function fmtData(d) { return d.split('-').reverse().join('/'); }
+
+        function setPontos(v, btn) {
+            document.querySelectorAll('.btn-atalho').forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active');
+            const inp = document.getElementById('pontosInput');
+            if (v === 'outro') { inp.style.display = 'block'; inp.focus(); ptsSelecionados = 0; }
+            else { inp.style.display = 'none'; inp.value = ''; ptsSelecionados = v; }
+        }
+
+        function adicionarPontos() {
+            const triboId = document.getElementById('tribo').value;
+            const data = document.getElementById('data').value;
+            const sem = document.getElementById('semana').value;
+            const pInput = document.getElementById('pontosInput');
+            const pontos = pInput.style.display === 'block' ? (parseInt(pInput.value)||0) : ptsSelecionados;
+
+            if(!data || pontos <= 0) return mostrarToast('Insira os pontos!', '⚠️');
+            
+            dados.push({ id: idC++, data, semana: sem, triboId: triboId, pontos });
+            salvarDB(); atualizarTela();
+            
+            const t = CONFIG.tribos.find(x=>x.id===triboId);
+            mostrarToast(`${fmtStr(pontos)} pts para ${t.nome}!`);
+        }
+
+        function removerPonto(id) {
+            if(confirm('Excluir este lançamento?')) { dados = dados.filter(d=>d.id !== id); salvarDB(); atualizarTela(); }
+        }
+
+        function renderAbas() {
+            document.getElementById('semana').innerHTML = CONFIG.semanas.map(s=>`<option value="${s}">${s}</option>`).join('');
+            
+            let html = `<button class="tab-btn ${semanaAtiva==='Geral'?'active':''}" onclick="setSemana('Geral')">Consolidado Geral</button>`;
+            CONFIG.semanas.forEach(s => { html += `<button class="tab-btn ${semanaAtiva===s?'active':''}" onclick="setSemana('${s}')">${s}</button>`; });
+            document.getElementById('tabsSemanas').innerHTML = html;
+        }
+
+        function setSemana(s) { semanaAtiva = s; renderAbas(); atualizarTela(); }
+
+        function atualizarTela() {
+            document.getElementById('headerTitulo').textContent = CONFIG.tituloNacao;
+            if (bannerMainUrl) {
+                document.getElementById('appBanner').src = bannerMainUrl;
+                document.getElementById('appBanner').style.display = 'block';
+                document.getElementById('appHeader').style.display = 'none';
+            } else {
+                document.getElementById('appBanner').style.display = 'none';
+                document.getElementById('appHeader').style.display = 'block';
+            }
+
+            document.getElementById('tituloPlacar').textContent = semanaAtiva === 'Geral' ? '🏆 Placar Consolidado' : `📊 Placar: ${semanaAtiva}`;
+            document.getElementById('tribo').innerHTML = CONFIG.tribos.map(t=>`<option value="${t.id}">${t.emoji} ${t.nome}</option>`).join('');
+            
+            // TOTAIS DAS TRIBOS
+            document.getElementById('totalGrid').innerHTML = CONFIG.tribos.map(t => {
+                const tGeral = dados.filter(d=>d.triboId===t.id).reduce((s,d)=>s+d.pontos,0);
+                const tSemana = dados.filter(d=>d.triboId===t.id && d.semana===semanaAtiva).reduce((s,d)=>s+d.pontos,0);
+                
+                let ptsHtml = `<div class="pts-destaque">${fmtStr(tGeral)}</div>`;
+                if(semanaAtiva !== 'Geral') ptsHtml = `<div class="pts-destaque" style="color:white;">${fmtStr(tSemana)}</div><div class="pts-sub">Geral: ${fmtStr(tGeral)}</div>`;
+
+                const foto = fotosTribos[t.id];
+                const imgHtml = foto 
+                    ? `<div class="img-wrapper" style="border:2px solid ${t.cor}"><img src="${foto}"></div>`
+                    : `<div class="img-wrapper" style="background:${t.cor}; color:${t.cor==='#FFD100'?'#000':'#FFF'}">${t.emoji}</div>`;
+                
+                return `<div class="total-item" style="border-left-color:${t.cor}">
+                    <div style="display:flex; gap:12px; align-items:center;">
+                        ${imgHtml}
+                        <div><div class="nome-tribo">${t.nome}</div>${t.lider ? `<div class="lider-tribo">👤 ${t.lider}</div>` : ''}</div>
+                    </div>
+                    <div class="pontos-tribo">${ptsHtml}</div>
+                </div>`;
+            }).join('');
+
+            // TOTAL GERAL DA NAÇÃO
+            const somaG = dados.reduce((a,b)=>a+b.pontos,0);
+            const somaS = semanaAtiva !== 'Geral' ? dados.filter(d=>d.semana===semanaAtiva).reduce((a,b)=>a+b.pontos,0) : 0;
+            
+            if(semanaAtiva === 'Geral') document.getElementById('totalGeral').innerHTML = `<div class="label">Total Arrecadado</div><div class="valor">${fmtStr(somaG)}</div>`;
+            else document.getElementById('totalGeral').innerHTML = `<div class="label">Total na ${semanaAtiva}</div><div class="valor" style="color:white; font-size:2.4em;">${fmtStr(somaS)}</div><div class="label" style="font-size:0.8em; margin-top:5px;">Acumulado: <span style="color:var(--fju-amarelo)">${fmtStr(somaG)}</span></div>`;
+
+            // HISTÓRICO
+            const histData = semanaAtiva === 'Geral' ? dados : dados.filter(d=>d.semana===semanaAtiva);
+            document.getElementById('qtdHistorico').textContent = histData.length;
+            document.getElementById('listaTribos').innerHTML = [...histData].reverse().slice(0, 50).map(d => {
+                const t = CONFIG.tribos.find(x=>x.id===d.triboId);
+                return `<div class="tribo-card" style="border-left-color:${t?.cor||'#ccc'}">
+                    <div class="info"><div class="nome">${t?.emoji||'📌'} ${t?.nome||'Desconhecida'}</div><div class="detalhe"><span class="badge-semana">${d.semana}</span> ${fmtData(d.data)}</div></div>
+                    <div class="acoes"><div class="pontos">+${fmtStr(d.pontos)}</div><button class="btn-mini" onclick="removerPonto(${d.id})">Apagar</button></div>
+                </div>`;
+            }).join('');
+        }
+
+        // ================= RELATÓRIOS E EXPORTAÇÃO =================
+        function copiarTexto() {
+            let m = `🏛️ *${CONFIG.tituloNacao} • FJU*\n🎨 ${CONFIG.tema}\n\n`;
+            if(semanaAtiva !== 'Geral') m += `📌 *FECHAMENTO: ${semanaAtiva.toUpperCase()}*\n`;
+            else m += `🏆 *PLACAR GERAL CONSOLIDADO*\n`;
+            m += `--------------------------\n\n`;
+            
+            CONFIG.tribos.forEach(t => {
+                const g = dados.filter(d=>d.triboId===t.id).reduce((s,d)=>s+d.pontos,0);
+                const s = dados.filter(d=>d.triboId===t.id && d.semana===semanaAtiva).reduce((s,d)=>s+d.pontos,0);
+                m += `${t.emoji} *${t.nome}* ${t.lider ? `(👤 ${t.lider})` : ''}\n`;
+                if(semanaAtiva !== 'Geral') m += `🔹 Semana: ${fmtStr(s)} pts _(Acumulado: ${fmtStr(g)})_\n\n`;
+                else m += `🔹 Total: ${fmtStr(g)} pts\n\n`;
+            });
+            m += `--------------------------\nFJ🔥U`;
+            compartilharViaCelular(m);
+        }
+
+        function copiarRelatorioCompleto() {
+            if(dados.length === 0) return mostrarToast('Nenhum dado para o relatório.', '⚠️');
+            let m = `🏛️ *RELATÓRIO FINAL DE CICLO*\n${CONFIG.simboloFJU} *${CONFIG.tituloNacao} • FJU*\n🎨 ${CONFIG.tema}\n`;
+            m += `📅 Período: ${fmtData(CONFIG.dataInicio)} a ${fmtData(CONFIG.dataFim)}\n\n`;
+
+            m += `🏆 *TOTAIS GERAIS ACUMULADOS*\n`;
+            const somaG = dados.reduce((a,b)=>a+b.pontos,0);
+            CONFIG.tribos.forEach(t => {
+                const g = dados.filter(d=>d.triboId===t.id).reduce((s,d)=>s+d.pontos,0);
+                m += `${t.emoji} *${t.nome}* ${t.lider?`(Líder: ${t.lider})`:''}: ${fmtStr(g)} pts\n`;
+            });
+            m += `*TOTAL DA NAÇÃO: ${fmtStr(somaG)} pts*\n\n`;
+
+            m += `📊 *DESEMPENHO POR SEMANA*\n`;
+            CONFIG.semanas.forEach(s => {
+                const hasData = dados.some(d=>d.semana === s);
+                if(hasData) {
+                    m += `\n📌 *${s.toUpperCase()}*\n`;
+                    CONFIG.tribos.forEach(t => {
+                        const ts = dados.filter(d=>d.triboId===t.id && d.semana===s).reduce((sum,d)=>sum+d.pontos,0);
+                        if(ts > 0) m += `• ${t.nome}: ${fmtStr(ts)} pts\n`;
+                    });
+                }
+            });
+
+            m += `\n--------------------------\nFJ🔥U`;
+            compartilharViaCelular(m);
+        }
+
+        function exportarRelatorioCSV() {
+            if(dados.length === 0) return mostrarToast('Sem dados para exportar!', '⚠️');
+            let csv = `RELATÓRIO FINAL - ${CONFIG.tituloNacao.toUpperCase()}\n`;
+            csv += `Tema: ${CONFIG.tema}\n`;
+            csv += `Período: ${fmtData(CONFIG.dataInicio)} a ${fmtData(CONFIG.dataFim)}\n\n`;
+
+            csv += `TOTAIS GERAIS\nTribo;Líder;Pontuação\n`;
+            CONFIG.tribos.forEach(t => {
+                const tot = dados.filter(d=>d.triboId===t.id).reduce((s,d)=>s+d.pontos,0);
+                csv += `${t.nome};${t.lider||'Sem líder'};${tot}\n`;
+            });
+            csv += `\nRESUMO POR SEMANA\nSemana;Tribo;Pontuação\n`;
+            CONFIG.semanas.forEach(s => {
+                CONFIG.tribos.forEach(t => {
+                    const tot = dados.filter(d=>d.triboId===t.id && d.semana===s).reduce((sum,d)=>sum+d.pontos,0);
+                    if(tot > 0) csv += `${s};${t.nome};${tot}\n`;
+                });
+            });
+            csv += `\nHISTÓRICO COMPLETO DE LANÇAMENTOS\nData;Semana;Tribo;Pontos\n`;
+            dados.forEach(d => {
+                const t = CONFIG.tribos.find(x=>x.id===d.triboId);
+                csv += `${fmtData(d.data)};${d.semana};${t?.nome};${d.pontos}\n`;
+            });
+
+            const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `relatorio_${CONFIG.tituloNacao.replace(/\s+/g,'_').toLowerCase()}.csv`;
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            mostrarToast('Relatório Excel baixado!', '📊');
+        }
+
+        function salvarDadosJSON() {
+            if(dados.length===0) return mostrarToast('Sem dados!','⚠️');
+            const url = URL.createObjectURL(new Blob([JSON.stringify({dados, CONFIG, fotosTribos, arteUrl, bannerMainUrl},null,2)], {type:'application/json'}));
+            const a = document.createElement('a'); a.href=url; a.download=`backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); mostrarToast('Backup Salvo!','💾');
+        }
+
+        // ================= GERAR IMAGEM MOBILE =================
+        function gerarImagem() {
+            if(dados.length === 0) return mostrarToast('Sem dados para gerar imagem!', '⚠️');
+            const btn = document.getElementById('btnImg'); btn.textContent = '⏳ ...';
+
+            const wrap = document.createElement('div');
+            wrap.style.cssText = 'position:absolute; left:-9999px; top:0; width:600px; z-index:-1;';
+            const div = document.createElement('div');
+            
+            let fnd = `background: var(--fju-azul-escuro);`; let ovr = '';
+            if(arteUrl) {
+                fnd = `background-image: url('${arteUrl}'); background-size: cover; background-position: center;`;
+                ovr = `<div style="position:absolute; inset:0; background:rgba(0,45,98,0.85); border-radius:15px; z-index:0;"></div>`;
+            }
+
+            div.style.cssText = `position:relative; width:600px; padding:35px; color:white; font-family:sans-serif; box-sizing:border-box; overflow:hidden; border-radius: 15px; ${fnd}`;
+
+            let trH = CONFIG.tribos.map(t => {
+                const tG = dados.filter(d=>d.triboId===t.id).reduce((s,d)=>s+d.pontos,0);
+                const tS = semanaAtiva !== 'Geral' ? dados.filter(d=>d.triboId===t.id && d.semana===semanaAtiva).reduce((s,d)=>s+d.pontos,0) : 0;
+                
+                let ph = `<div style="font-weight:900;font-size:1.8em;color:var(--fju-amarelo);">${fmtStr(tG)} pts</div>`;
+                if(semanaAtiva !== 'Geral') ph = `<div style="text-align:right;"><div style="font-weight:900;font-size:1.6em;color:white;line-height:1;">${fmtStr(tS)}</div><div style="font-size:0.85em;color:var(--fju-amarelo);margin-top:4px;">Geral: ${fmtStr(tG)} pts</div></div>`;
+
+                const foto = fotosTribos[t.id];
+                const fotoImg = foto 
+                    ? `<img src="${foto}" style="width:50px;height:50px;border-radius:50%;border:2px solid ${t.cor};object-fit:cover;flex-shrink:0;">` 
+                    : `<div style="width:50px;height:50px;border-radius:50%;background:${t.cor};display:flex;align-items:center;justify-content:center;font-size:24px;color:${t.cor==='#FFD100'?'#000':'#FFF'};flex-shrink:0;">${t.emoji}</div>`;
+
+                return `<div style="display:flex;justify-content:space-between;align-items:center;padding:15px;margin-bottom:10px;background:rgba(255,255,255,0.1);border-radius:12px;border-left:6px solid ${t.cor};position:relative;z-index:1;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        ${fotoImg}
+                        <div>
+                            <div style="font-weight:800;font-size:1.4em;">${t.nome}</div>
+                            ${t.lider ? `<div style="font-size:0.9em;color:rgba(255,255,255,0.7);margin-top:2px;">👤 ${t.lider}</div>` : ''}
+                        </div>
+                    </div>
+                    ${ph}
+                </div>`;
+            }).join('');
+
+            const somaG = dados.reduce((a,b)=>a+b.pontos,0);
+            const somaS = semanaAtiva !== 'Geral' ? dados.filter(d=>d.semana===semanaAtiva).reduce((a,b)=>a+b.pontos,0) : 0;
+            
+            let totH = `<div style="font-size:1.1em;color:#8ab4f8;text-transform:uppercase;letter-spacing:2px;font-weight:bold;">🏆 Total Geral Arrecadado</div><div style="font-size:3.5em;font-weight:900;color:var(--fju-amarelo);margin-top:5px;text-shadow:0 4px 10px rgba(0,0,0,0.5);">${fmtStr(somaG)} pts</div>`;
+            if(semanaAtiva !== 'Geral') totH = `<div style="font-size:1.1em;color:#8ab4f8;text-transform:uppercase;letter-spacing:2px;font-weight:bold;">🏆 Fechamento da ${semanaAtiva}</div><div style="font-size:3.5em;font-weight:900;color:white;margin-top:5px;text-shadow:0 4px 10px rgba(0,0,0,0.5);line-height:1;">${fmtStr(somaS)}</div><div style="font-size:1.1em;color:var(--fju-amarelo);margin-top:10px;font-weight:bold;">ACUMULADO GERAL: ${fmtStr(somaG)} pts</div>`;
+
+            div.innerHTML = `
+                ${ovr}
+                <div style="position:relative; z-index:1;">
+                    <div style="text-align:center;padding-bottom:20px;border-bottom:2px solid rgba(255,209,0,0.3);">
+                        <div style="background:white;color:var(--fju-azul-escuro);display:inline-block;padding:5px 20px;border-radius:20px;font-weight:900;font-size:1.5em;border:3px solid var(--fju-vermelho);margin-bottom:15px;">FJ<span style="color:var(--fju-vermelho)">U</span> ⚡</div>
+                        <h1 style="font-size:2.8em;margin:0;letter-spacing:1px;color:white;">${CONFIG.tituloNacao}</h1>
+                    </div>
+                    <div style="text-align:center;margin:25px 0;padding:12px;background:rgba(255,209,0,0.15);border-radius:10px;border:2px solid rgba(255,209,0,0.4);">
+                        <span style="color:var(--fju-amarelo);font-weight:800;font-size:1.3em;">🎨 ${CONFIG.tema}</span>
+                    </div>
+                    ${trH}
+                    <div style="text-align:center;margin-top:30px;padding-top:25px;border-top:2px solid rgba(255,209,0,0.2);">
+                        ${totH}
+                    </div>
+                    <div style="text-align:center;margin-top:20px;font-size:0.9em;color:#8ab4f8;font-weight:bold;">
+                        Rally FJU: ${fmtData(CONFIG.dataInicio)} a ${fmtData(CONFIG.dataFim)}
+                    </div>
+                </div>
+            `;
+
+            wrap.appendChild(div); document.body.appendChild(wrap);
+            
+            html2canvas(div, { scale: 2, useCORS: true, backgroundColor: null, windowWidth: 600, width: 600 }).then(cv => {
+                cv.toBlob(async blob => {
+                    const file = new File([blob], "placar_fju.png", { type: "image/png" });
+                    const dataUrl = cv.toDataURL('image/png');
+
+                    // Tentativa 1: Web Share API NATIVA (Padrão para WhatsApp)
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        try {
+                            await navigator.share({ files: [file], title: 'Placar FJU' });
+                            btn.textContent = '🖼️ Gerar Imagem'; document.body.removeChild(wrap);
+                            return;
+                        } catch (err) { console.log('Share nativo cancelado'); }
+                    }
+
+                    // Tentativa 2: Fallback Supremo para Mobile -> Modal com a Imagem
+                    btn.textContent = '🖼️ Gerar Imagem';
+                    document.body.removeChild(wrap);
+                    mostrarModalImagem(dataUrl);
+
+                }, 'image/png');
+            }).catch(err => {
+                mostrarToast('Erro ao gerar imagem.', '❌');
+                btn.textContent = '🖼️ Gerar Imagem';
+                document.body.removeChild(wrap);
+            });
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
