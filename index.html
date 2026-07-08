@@ -49,6 +49,15 @@
             border: 2px solid var(--fju-vermelho); margin-top: 5px;
         }
         .logo-fju .u { color: var(--fju-vermelho); }
+        
+        .img-logo-fju {
+            height: 60px;
+            border-radius: 50%;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            border: 2px solid var(--fju-vermelho);
+            display: none;
+        }
 
         /* ========== CLASSES UTILITÁRIAS ========== */
         .btn-base { border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: transform 0.2s; font-size: 0.9em; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; }
@@ -137,17 +146,18 @@
     <div class="container">
         <div class="toast" id="toast"><span id="toastMessage">Sucesso!</span></div>
 
-        <!-- BANNER PRINCIPAL (Opcional) -->
         <img id="appBanner" class="banner-topo" src="" alt="Banner da Nação">
 
-        <!-- HEADER DA NAÇÃO -->
         <div class="header" id="appHeader">
             <h1><span id="headerTitulo">Nação de Impacto</span> <span class="highlight">•</span> <span id="headerFJU">FJU</span></h1>
             <div style="font-size:0.9em; opacity:0.9; margin-bottom: 10px;">Controle de Pontuação Semanal</div>
-            <div class="logo-fju">FJ<span class="u">U</span> <span id="headerSimbolo">⚡</span></div>
+            
+            <div id="containerLogoFJU">
+                <img id="appLogoFju" class="img-logo-fju" src="" alt="Logo FJU">
+                <div class="logo-fju" id="appLogoText">FJ<span class="u">U</span> <span id="headerSimbolo">⚡</span></div>
+            </div>
         </div>
 
-        <!-- FORMULÁRIO RÁPIDO AGORA FICA AQUI EM CIMA -->
         <div class="card-lancamento">
             <div style="display:flex; gap:10px;">
                 <div class="input-group" style="flex:1;"><label>📅 Data</label><input type="date" id="data"></div>
@@ -172,7 +182,6 @@
                 <input type="number" id="pontosInput" placeholder="Digite o valor exato..." style="display:none; margin-top: 10px;">
             </div>
 
-            <!-- NOVO CAMPO: DESCRIÇÃO -->
             <div class="input-group">
                 <label>📝 Descrição / Motivo</label>
                 <input type="text" id="descricaoPonto" placeholder="Ex: Tarefa relâmpago, Desafio...">
@@ -181,10 +190,8 @@
             <button class="btn-base btn-azul" style="font-size: 1.1em; padding: 15px;" onclick="adicionarPontos()">➕ Lançar Pontos</button>
         </div>
 
-        <!-- SELETOR DE VISÃO (ABAS) -->
         <div class="tabs-semanas" id="tabsSemanas"></div>
 
-        <!-- PLACAR / TOTAIS -->
         <div class="total-section">
             <h2 id="tituloPlacar">🏆 Placar Consolidado</h2>
             <div class="total-grid" id="totalGrid"></div>
@@ -211,7 +218,6 @@
             </div>
         </div>
 
-        <!-- HISTÓRICO -->
         <div class="historico-section">
             <div class="historico-header">
                 <h3>📋 Últimos Lançamentos</h3>
@@ -220,7 +226,6 @@
             <div class="lista-tribos" id="listaTribos"></div>
         </div>
 
-        <!-- PAINEL DE CONTROLE AGORA NO RODAPÉ -->
         <div class="painel-gerenciamento">
             <div class="painel-header" onclick="togglePainel()">
                 <span>⚙️ Configurações (Liderança)</span>
@@ -243,6 +248,10 @@
                         <h4>🖼️ Identidade Visual e Tema</h4>
                         <div class="config-item"><label>Nome da Nação:</label><input type="text" id="cfgNacao"></div>
                         <div class="config-item"><label>Tema da Semana:</label><input type="text" id="cfgTema"></div>
+                        <div class="config-item">
+                            <label>Logo Oficial da FJU (Ficará no Topo):</label>
+                            <input type="file" accept="image/*" onchange="uploadLogoFju(this)">
+                        </div>
                         <div class="config-item">
                             <label>Banner Principal (Topo do Site):</label>
                             <input type="file" accept="image/*" onchange="uploadBannerPrincipal(this)">
@@ -282,7 +291,7 @@
         };
 
         let dados = [], idC = 0, semanaAtiva = 'Geral', ptsSelecionados = 100000;
-        let arteUrl = '', bannerMainUrl = '';
+        let arteUrl = '', bannerMainUrl = '', logoFjuUrl = '';
         let fotosTribos = {};
 
         // Init e LocalStorage
@@ -295,10 +304,10 @@
                     fotosTribos = slv.fotosTribos || {};
                     arteUrl = slv.arteUrl || '';
                     bannerMainUrl = slv.bannerMainUrl || '';
+                    logoFjuUrl = slv.logoFjuUrl || '';
                 }
             } catch (e) {}
             
-            // Retro-compatibilidade com base antiga
             CONFIG.tribos.forEach(t => { if(t.oculta === undefined) t.oculta = false; });
             dados.forEach(d => { if(d.descricao === undefined) d.descricao = ''; });
 
@@ -308,7 +317,7 @@
         }
 
         function salvarDB() {
-            try { localStorage.setItem('fjuDataV3', JSON.stringify({dados, idC, CONFIG, fotosTribos, arteUrl, bannerMainUrl})); } 
+            try { localStorage.setItem('fjuDataV3', JSON.stringify({dados, idC, CONFIG, fotosTribos, arteUrl, bannerMainUrl, logoFjuUrl})); } 
             catch(e) { mostrarToast('⚠️ Imagem pesada! Tente não colocar fotos gigantes.', '⚠️'); }
         }
 
@@ -454,6 +463,13 @@
             reader.readAsDataURL(file);
         }
 
+        function uploadLogoFju(input) {
+            const file = input.files[0]; if(!file) return;
+            const reader = new FileReader();
+            reader.onload = e => { logoFjuUrl = e.target.result; salvarDB(); atualizarTela(); mostrarToast('Logo Oficial salva!'); };
+            reader.readAsDataURL(file);
+        }
+
         function uploadBannerPrincipal(input) {
             const file = input.files[0]; if(!file) return;
             const reader = new FileReader();
@@ -515,7 +531,6 @@
             
             dados.push({ id: idC++, data, semana: sem, triboId: triboId, pontos, descricao: desc });
             
-            // Limpa descricao após lançamento
             document.getElementById('descricaoPonto').value = '';
             
             salvarDB(); atualizarTela();
@@ -540,6 +555,16 @@
 
         function atualizarTela() {
             document.getElementById('headerTitulo').textContent = CONFIG.tituloNacao;
+            
+            if (logoFjuUrl) {
+                document.getElementById('appLogoFju').src = logoFjuUrl;
+                document.getElementById('appLogoFju').style.display = 'inline-block';
+                document.getElementById('appLogoText').style.display = 'none';
+            } else {
+                document.getElementById('appLogoFju').style.display = 'none';
+                document.getElementById('appLogoText').style.display = 'inline-block';
+            }
+
             if (bannerMainUrl) {
                 document.getElementById('appBanner').src = bannerMainUrl;
                 document.getElementById('appBanner').style.display = 'block';
@@ -551,11 +576,9 @@
 
             document.getElementById('tituloPlacar').textContent = semanaAtiva === 'Geral' ? '🏆 Placar Consolidado' : `📊 Placar: ${semanaAtiva}`;
             
-            // Render Tribos apenas VISÍVEIS no Dropdown
             const tribosVisiveis = CONFIG.tribos.filter(t => !t.oculta);
             document.getElementById('tribo').innerHTML = tribosVisiveis.map(t=>`<option value="${t.id}">${t.emoji} ${t.nome}</option>`).join('');
             
-            // TOTAIS DAS TRIBOS (Somente Visíveis)
             document.getElementById('totalGrid').innerHTML = tribosVisiveis.map(t => {
                 const tGeral = dados.filter(d=>d.triboId===t.id).reduce((s,d)=>s+d.pontos,0);
                 const tSemana = dados.filter(d=>d.triboId===t.id && d.semana===semanaAtiva).reduce((s,d)=>s+d.pontos,0);
@@ -577,7 +600,6 @@
                 </div>`;
             }).join('');
 
-            // TOTAL GERAL DA NAÇÃO (Calcula apenas das tribos que NÃO estão excluídas. Ocultas não contam no total pra não confundir, ou contam? Vou contar apenas das tribos existentes que não estão ocultas)
             const idsVisiveis = tribosVisiveis.map(t => t.id);
             const somaG = dados.filter(d => idsVisiveis.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0);
             const somaS = semanaAtiva !== 'Geral' ? dados.filter(d=>d.semana===semanaAtiva && idsVisiveis.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0) : 0;
@@ -585,7 +607,6 @@
             if(semanaAtiva === 'Geral') document.getElementById('totalGeral').innerHTML = `<div class="label">Total Arrecadado</div><div class="valor">${fmtStr(somaG)}</div>`;
             else document.getElementById('totalGeral').innerHTML = `<div class="label">Total na ${semanaAtiva}</div><div class="valor" style="color:white; font-size:2.4em;">${fmtStr(somaS)}</div><div class="label" style="font-size:0.8em; margin-top:5px;">Acumulado: <span style="color:var(--fju-amarelo)">${fmtStr(somaG)}</span></div>`;
 
-            // HISTÓRICO (Mostra tudo, mesmo de tribos ocultas, para auditoria visual)
             const histData = semanaAtiva === 'Geral' ? dados : dados.filter(d=>d.semana===semanaAtiva);
             document.getElementById('qtdHistorico').textContent = histData.length;
             document.getElementById('listaTribos').innerHTML = [...histData].reverse().slice(0, 50).map(d => {
@@ -678,12 +699,11 @@
                 });
             });
             
-            // Coluna de Descrição Adicionada aqui!
             csv += `\nHISTÓRICO COMPLETO DE LANÇAMENTOS\nData;Semana;Tribo;Pontos;Descrição/Motivo\n`;
             dados.forEach(d => {
                 const t = CONFIG.tribos.find(x=>x.id===d.triboId);
                 const nomeT = t ? t.nome : 'Tribo Excluída';
-                const desc = d.descricao ? d.descricao.replace(/;/g, ',') : 'Sem descrição'; // Evitar quebrar CSV
+                const desc = d.descricao ? d.descricao.replace(/;/g, ',') : 'Sem descrição'; 
                 csv += `${fmtData(d.data)};${d.semana};${nomeT};${d.pontos};${desc}\n`;
             });
 
@@ -697,11 +717,11 @@
 
         function salvarDadosJSON() {
             if(dados.length===0) return mostrarToast('Sem dados!','⚠️');
-            const url = URL.createObjectURL(new Blob([JSON.stringify({dados, CONFIG, fotosTribos, arteUrl, bannerMainUrl},null,2)], {type:'application/json'}));
+            const url = URL.createObjectURL(new Blob([JSON.stringify({dados, CONFIG, fotosTribos, arteUrl, bannerMainUrl, logoFjuUrl},null,2)], {type:'application/json'}));
             const a = document.createElement('a'); a.href=url; a.download=`backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); mostrarToast('Backup Salvo!','💾');
         }
 
-        // ================= GERAR IMAGEM MOBILE =================
+        // Gerar Imagem Forçada para Mobile (600px)
         function gerarImagem() {
             if(dados.length === 0) return mostrarToast('Sem dados para gerar imagem!', '⚠️');
             const btn = document.getElementById('btnImg'); btn.textContent = '⏳ ...';
@@ -751,11 +771,16 @@
             let totH = `<div style="font-size:1.1em;color:#8ab4f8;text-transform:uppercase;letter-spacing:2px;font-weight:bold;">🏆 Total Geral Arrecadado</div><div style="font-size:3.5em;font-weight:900;color:var(--fju-amarelo);margin-top:5px;text-shadow:0 4px 10px rgba(0,0,0,0.5);">${fmtStr(somaG)} pts</div>`;
             if(semanaAtiva !== 'Geral') totH = `<div style="font-size:1.1em;color:#8ab4f8;text-transform:uppercase;letter-spacing:2px;font-weight:bold;">🏆 Fechamento da ${semanaAtiva}</div><div style="font-size:3.5em;font-weight:900;color:white;margin-top:5px;text-shadow:0 4px 10px rgba(0,0,0,0.5);line-height:1;">${fmtStr(somaS)}</div><div style="font-size:1.1em;color:var(--fju-amarelo);margin-top:10px;font-weight:bold;">ACUMULADO GERAL: ${fmtStr(somaG)} pts</div>`;
 
+            let logoGeradaHtml = `<div style="background:white;color:var(--fju-azul-escuro);display:inline-block;padding:5px 20px;border-radius:20px;font-weight:900;font-size:1.5em;border:3px solid var(--fju-vermelho);margin-bottom:15px;">FJ<span style="color:var(--fju-vermelho)">U</span> ⚡</div>`;
+            if (logoFjuUrl) {
+                logoGeradaHtml = `<img src="${logoFjuUrl}" style="height: 80px; border-radius: 50%; margin-bottom:15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 2px solid var(--fju-vermelho);">`;
+            }
+
             div.innerHTML = `
                 ${ovr}
                 <div style="position:relative; z-index:1;">
                     <div style="text-align:center;padding-bottom:20px;border-bottom:2px solid rgba(255,209,0,0.3);">
-                        <div style="background:white;color:var(--fju-azul-escuro);display:inline-block;padding:5px 20px;border-radius:20px;font-weight:900;font-size:1.5em;border:3px solid var(--fju-vermelho);margin-bottom:15px;">FJ<span style="color:var(--fju-vermelho)">U</span> ⚡</div>
+                        ${logoGeradaHtml}
                         <h1 style="font-size:2.8em;margin:0;letter-spacing:1px;color:white;">${CONFIG.tituloNacao}</h1>
                     </div>
                     <div style="text-align:center;margin:25px 0;padding:12px;background:rgba(255,209,0,0.15);border-radius:10px;border:2px solid rgba(255,209,0,0.4);">
