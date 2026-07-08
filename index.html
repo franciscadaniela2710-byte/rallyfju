@@ -60,7 +60,7 @@
         .btn-cinza { background: #555; color: var(--fju-branco); }
 
         /* ========== PAINEL DE CONTROLE ========== */
-        .painel-gerenciamento { background: #E8F0FE; border-radius: 12px; margin: 15px; border: 2px solid var(--fju-azul-claro); overflow: hidden; }
+        .painel-gerenciamento { background: #E8F0FE; border-radius: 12px; margin: 30px 15px 15px; border: 2px solid var(--fju-azul-claro); overflow: hidden; }
         .painel-header { background: var(--fju-azul-escuro); padding: 15px; display: flex; justify-content: space-between; color: white; font-weight: bold; cursor: pointer; }
         .painel-conteudo { display: none; padding: 15px; }
         .painel-conteudo.aberto { display: block; }
@@ -82,8 +82,8 @@
         .card-lancamento { background: white; border-radius: 15px; padding: 20px; margin: 0 15px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 4px solid var(--fju-azul-claro); }
         .card-lancamento label { display: block; font-weight: 700; color: var(--fju-azul-escuro); margin-bottom: 8px; font-size: 0.95em; }
         .input-group { margin-bottom: 15px; }
-        .input-group select, .input-group input[type="date"], .input-group input[type="number"] { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; background: #fafafa; color: var(--fju-azul-escuro); font-weight: 600; }
-        .input-group select:focus { border-color: var(--fju-azul-claro); outline: none; }
+        .input-group select, .input-group input[type="date"], .input-group input[type="text"], .input-group input[type="number"] { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; background: #fafafa; color: var(--fju-azul-escuro); font-weight: 600; }
+        .input-group select:focus, .input-group input[type="text"]:focus { border-color: var(--fju-azul-claro); outline: none; }
         
         .grid-atalhos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .btn-atalho { background: #f0f0f0; border: 2px solid #ddd; padding: 12px 5px; border-radius: 8px; font-weight: 700; color: var(--fju-azul-escuro); font-size: 0.9em; transition: all 0.2s; }
@@ -121,8 +121,8 @@
         .lista-tribos { display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; }
         .tribo-card { background: white; border-radius: 10px; padding: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--fju-azul-claro); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .tribo-card .info .nome { font-weight: 700; color: var(--fju-azul-escuro); font-size: 1em; }
-        .tribo-card .info .detalhe { font-size: 0.75em; color: #777; margin-top: 3px; display: flex; gap: 5px; flex-wrap: wrap; }
-        .badge-semana { background: #eee; padding: 2px 6px; border-radius: 4px; color: #333; font-weight: bold; }
+        .tribo-card .info .detalhe { font-size: 0.75em; color: #777; margin-top: 3px; display: flex; gap: 5px; flex-wrap: wrap; flex-direction: column;}
+        .badge-semana { background: #eee; padding: 2px 6px; border-radius: 4px; color: #333; font-weight: bold; display: inline-block; width: max-content;}
         .tribo-card .acoes { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
         .tribo-card .pontos { font-weight: 900; color: var(--fju-azul-claro); font-size: 1.1em; }
         .btn-mini { background: #eee; border: none; padding: 5px 10px; border-radius: 5px; font-size: 0.8em; font-weight: bold; }
@@ -137,60 +137,17 @@
     <div class="container">
         <div class="toast" id="toast"><span id="toastMessage">Sucesso!</span></div>
 
+        <!-- BANNER PRINCIPAL (Opcional) -->
         <img id="appBanner" class="banner-topo" src="" alt="Banner da Nação">
 
+        <!-- HEADER DA NAÇÃO -->
         <div class="header" id="appHeader">
             <h1><span id="headerTitulo">Nação de Impacto</span> <span class="highlight">•</span> <span id="headerFJU">FJU</span></h1>
             <div style="font-size:0.9em; opacity:0.9; margin-bottom: 10px;">Controle de Pontuação Semanal</div>
             <div class="logo-fju">FJ<span class="u">U</span> <span id="headerSimbolo">⚡</span></div>
         </div>
 
-        <div class="painel-gerenciamento">
-            <div class="painel-header" onclick="togglePainel()">
-                <span>⚙️ Configurações (Liderança)</span>
-                <span id="iconeToggle">▼</span>
-            </div>
-            <div class="painel-conteudo" id="painelConteudo">
-                
-                <div class="painel-login" id="painelLogin">
-                    <input type="password" id="senhaPainel" placeholder="Senha..." onkeydown="if(event.key==='Enter') verificarSenha()">
-                    <button class="btn-base btn-azul" style="width:auto;" onclick="verificarSenha()">🔓 Entrar</button>
-                </div>
-
-                <div id="areaConfiguracoes" style="display: none;">
-                    <div class="config-grupo">
-                        <h4>👑 Tribos (Nome, Cabeça, Foto e Emoji)</h4>
-                        <div id="cfgTribosList"></div>
-                    </div>
-
-                    <div class="config-grupo">
-                        <h4>🖼️ Identidade Visual e Tema</h4>
-                        <div class="config-item"><label>Nome da Nação:</label><input type="text" id="cfgNacao"></div>
-                        <div class="config-item"><label>Tema da Semana:</label><input type="text" id="cfgTema"></div>
-                        <div class="config-item">
-                            <label>Banner Principal (Topo do Site):</label>
-                            <input type="file" accept="image/*" onchange="uploadBannerPrincipal(this)">
-                        </div>
-                        <div class="config-item">
-                            <label>Fundo do WhatsApp (Arte do Tema):</label>
-                            <input type="file" accept="image/*" onchange="uploadArteTema(this)">
-                        </div>
-                    </div>
-
-                    <div class="config-grupo">
-                        <h4>📅 Semanas do Rally</h4>
-                        <div class="config-item">
-                            <label>Semanas (separe por vírgula):</label>
-                            <input type="text" id="cfgSemanas" placeholder="Ex: 1ª Semana, 2ª Semana...">
-                        </div>
-                        <div class="config-item"><label>Data Início:</label><input type="date" id="cfgInicio"></div>
-                        <div class="config-item"><label>Data Fim:</label><input type="date" id="cfgFim"></div>
-                    </div>
-                    <button class="btn-base btn-azul" onclick="salvarConfiguracoes()">💾 Salvar e Fechar</button>
-                </div>
-            </div>
-        </div>
-
+        <!-- FORMULÁRIO RÁPIDO AGORA FICA AQUI EM CIMA -->
         <div class="card-lancamento">
             <div style="display:flex; gap:10px;">
                 <div class="input-group" style="flex:1;"><label>📅 Data</label><input type="date" id="data"></div>
@@ -214,12 +171,20 @@
                 </div>
                 <input type="number" id="pontosInput" placeholder="Digite o valor exato..." style="display:none; margin-top: 10px;">
             </div>
+
+            <!-- NOVO CAMPO: DESCRIÇÃO -->
+            <div class="input-group">
+                <label>📝 Descrição / Motivo</label>
+                <input type="text" id="descricaoPonto" placeholder="Ex: Tarefa relâmpago, Desafio...">
+            </div>
             
             <button class="btn-base btn-azul" style="font-size: 1.1em; padding: 15px;" onclick="adicionarPontos()">➕ Lançar Pontos</button>
         </div>
 
+        <!-- SELETOR DE VISÃO (ABAS) -->
         <div class="tabs-semanas" id="tabsSemanas"></div>
 
+        <!-- PLACAR / TOTAIS -->
         <div class="total-section">
             <h2 id="tituloPlacar">🏆 Placar Consolidado</h2>
             <div class="total-grid" id="totalGrid"></div>
@@ -246,6 +211,7 @@
             </div>
         </div>
 
+        <!-- HISTÓRICO -->
         <div class="historico-section">
             <div class="historico-header">
                 <h3>📋 Últimos Lançamentos</h3>
@@ -253,15 +219,63 @@
             </div>
             <div class="lista-tribos" id="listaTribos"></div>
         </div>
+
+        <!-- PAINEL DE CONTROLE AGORA NO RODAPÉ -->
+        <div class="painel-gerenciamento">
+            <div class="painel-header" onclick="togglePainel()">
+                <span>⚙️ Configurações (Liderança)</span>
+                <span id="iconeToggle">▼</span>
+            </div>
+            <div class="painel-conteudo" id="painelConteudo">
+                
+                <div class="painel-login" id="painelLogin">
+                    <input type="password" id="senhaPainel" placeholder="Senha..." onkeydown="if(event.key==='Enter') verificarSenha()">
+                    <button class="btn-base btn-azul" style="width:auto;" onclick="verificarSenha()">🔓 Entrar</button>
+                </div>
+
+                <div id="areaConfiguracoes" style="display: none;">
+                    <div class="config-grupo">
+                        <h4>👑 Tribos (Editar, Ocultar e Excluir)</h4>
+                        <div id="cfgTribosList"></div>
+                    </div>
+
+                    <div class="config-grupo">
+                        <h4>🖼️ Identidade Visual e Tema</h4>
+                        <div class="config-item"><label>Nome da Nação:</label><input type="text" id="cfgNacao"></div>
+                        <div class="config-item"><label>Tema da Semana:</label><input type="text" id="cfgTema"></div>
+                        <div class="config-item">
+                            <label>Banner Principal (Topo do Site):</label>
+                            <input type="file" accept="image/*" onchange="uploadBannerPrincipal(this)">
+                        </div>
+                        <div class="config-item">
+                            <label>Fundo do WhatsApp (Arte do Tema):</label>
+                            <input type="file" accept="image/*" onchange="uploadArteTema(this)">
+                        </div>
+                    </div>
+
+                    <div class="config-grupo">
+                        <h4>📅 Semanas do Rally</h4>
+                        <div class="config-item">
+                            <label>Semanas (separe por vírgula):</label>
+                            <input type="text" id="cfgSemanas" placeholder="Ex: 1ª Semana, 2ª Semana...">
+                        </div>
+                        <div class="config-item"><label>Data Início:</label><input type="date" id="cfgInicio"></div>
+                        <div class="config-item"><label>Data Fim:</label><input type="date" id="cfgFim"></div>
+                    </div>
+                    <button class="btn-base btn-azul" onclick="salvarConfiguracoes()">💾 Fechar Configurações</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
         // Configuração Padrão Inicial
         let CONFIG = {
             tribos: [
-                { id: 't1', nome: 'Judá', lider: '', emoji: '🦁', cor: '#FFD100' },
-                { id: 't2', nome: 'Aser', lider: '', emoji: '🐟', cor: '#E30613' },
-                { id: 't3', nome: 'Zebulom', lider: '', emoji: '🌿', cor: '#0055A4' }
+                { id: 't1', nome: 'Judá', lider: '', emoji: '🦁', cor: '#FFD100', oculta: false },
+                { id: 't2', nome: 'Aser', lider: '', emoji: '🐟', cor: '#E30613', oculta: false },
+                { id: 't3', nome: 'Zebulom', lider: '', emoji: '🌿', cor: '#0055A4', oculta: false }
             ],
             semanas: ['1ª Semana', '2ª Semana', '3ª Semana', '4ª Semana', '5ª Semana'],
             dataInicio: '2026-07-01', dataFim: '2026-08-02', tituloNacao: 'Nação de Impacto', tituloFJU: 'FJU', simboloFJU: '⚡', tema: 'Série: O Bom Soldado'
@@ -284,6 +298,10 @@
                 }
             } catch (e) {}
             
+            // Retro-compatibilidade com base antiga
+            CONFIG.tribos.forEach(t => { if(t.oculta === undefined) t.oculta = false; });
+            dados.forEach(d => { if(d.descricao === undefined) d.descricao = ''; });
+
             document.getElementById('data').value = new Date().toISOString().slice(0,10);
             renderAbas();
             atualizarTela();
@@ -300,17 +318,13 @@
         }
 
         // ================= COMPARTILHAMENTO INTELIGENTE MOBILE =================
-        // Se o celular suportar a janela nativa de compartilhamento, usamos ela. Se não, usamos clipboard.
         async function compartilharViaCelular(texto) {
             if (navigator.share) {
                 try {
                     await navigator.share({ text: texto });
                     return true;
-                } catch (e) {
-                    console.log("Compartilhamento nativo cancelado");
-                }
+                } catch (e) { console.log("Compartilhamento nativo cancelado"); }
             }
-            // Fallback (PC ou se falhar)
             try {
                 await navigator.clipboard.writeText(texto);
                 mostrarToast('Texto copiado!', '📱');
@@ -319,7 +333,6 @@
             }
         }
 
-        // Janela de Fallback para Imagem no Celular
         function mostrarModalImagem(dataUrl) {
             const modal = document.createElement('div');
             modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;';
@@ -340,6 +353,7 @@
             painelAberto = !painelAberto;
             document.getElementById('painelConteudo').classList.toggle('aberto', painelAberto);
             document.getElementById('iconeToggle').textContent = painelAberto ? '▲' : '▼';
+            if(painelAberto) setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }, 100);
         }
 
         function verificarSenha() {
@@ -361,24 +375,38 @@
             document.getElementById('cfgInicio').value = CONFIG.dataInicio;
             document.getElementById('cfgFim').value = CONFIG.dataFim;
 
-            document.getElementById('cfgTribosList').innerHTML = CONFIG.tribos.map(t => {
+            let tribosHtml = CONFIG.tribos.map(t => {
                 const foto = fotosTribos[t.id] || '';
                 const imgDisplay = foto ? `<img src="${foto}">` : `<div style="width:50px;height:50px;border-radius:50%;background:${t.cor};display:flex;align-items:center;justify-content:center;font-size:24px;border:2px solid #ccc;">${t.emoji}</div>`;
+                const btnOcultarText = t.oculta ? '👁️ Mostrar' : '🙈 Ocultar';
+                const bgOcultar = t.oculta ? '#25D366' : '#555';
+                const opacity = t.oculta ? 'opacity: 0.6;' : '';
+
                 return `
-                <div class="card-tribo-edit">
+                <div class="card-tribo-edit" style="border-left: 5px solid ${t.cor}; ${opacity}">
                     <div class="tribo-edit-header">
                         ${imgDisplay}
                         <input type="file" accept="image/*" onchange="uploadFotoTribo('${t.id}', this)" style="font-size:0.8em; flex:1;">
                     </div>
-                    <div style="display:flex; gap:5px; margin-bottom:5px;">
+                    <div style="display:flex; gap:5px; margin-bottom:5px; align-items:center;">
+                        <input type="color" id="cfgCor_${t.id}" value="${t.cor}" style="width:35px; height:35px; padding:0; border:1px solid #ccc; border-radius:5px;">
                         <input type="text" id="cfgNome_${t.id}" value="${t.nome}" placeholder="Nome" style="flex:2; padding:8px;">
                         <input type="text" id="cfgEmoji_${t.id}" value="${t.emoji}" placeholder="Emoji" style="flex:1; padding:8px; text-align:center;">
                     </div>
                     <input type="text" id="cfgLider_${t.id}" value="${t.lider||''}" placeholder="Nome do Cabeça da Tribo" style="width:100%; padding:8px; margin-bottom:5px;">
-                    <button class="btn-base btn-amarelo" style="padding:6px; font-size:0.8em;" onclick="salvarTribo('${t.id}')">💾 Salvar Alteração na Tribo</button>
+                    
+                    <button class="btn-base btn-amarelo" style="padding:6px; font-size:0.8em; margin-bottom:5px;" onclick="salvarTribo('${t.id}')">💾 Salvar Alteração</button>
+                    
+                    <div style="display:flex; gap:5px;">
+                        <button class="btn-base" style="background:${bgOcultar}; color:white; padding:6px; font-size:0.8em; flex:1;" onclick="toggleOcultarTribo('${t.id}')">${btnOcultarText}</button>
+                        <button class="btn-base btn-vermelho" style="padding:6px; font-size:0.8em; flex:1;" onclick="excluirTribo('${t.id}')">🗑️ Excluir</button>
+                    </div>
                 </div>
                 `;
             }).join('');
+
+            tribosHtml += `<button class="btn-base btn-verde" style="margin-top:10px;" onclick="adicionarNovaTribo()">➕ Adicionar Nova Tribo</button>`;
+            document.getElementById('cfgTribosList').innerHTML = tribosHtml;
         }
 
         function salvarTribo(id) {
@@ -387,9 +415,36 @@
                 t.nome = document.getElementById(`cfgNome_${id}`).value || t.nome;
                 t.lider = document.getElementById(`cfgLider_${id}`).value || '';
                 t.emoji = document.getElementById(`cfgEmoji_${id}`).value || '📌';
+                t.cor = document.getElementById(`cfgCor_${id}`).value || t.cor;
                 salvarDB(); atualizarTela(); renderConfigPainel();
                 mostrarToast('Tribo salva com sucesso!');
             }
+        }
+
+        function toggleOcultarTribo(id) {
+            const t = CONFIG.tribos.find(x => x.id === id);
+            if(t) {
+                t.oculta = !t.oculta;
+                salvarDB(); renderConfigPainel(); atualizarTela();
+                mostrarToast(t.oculta ? 'Tribo Ocultada do Placar!' : 'Tribo Visível!');
+            }
+        }
+
+        function excluirTribo(id) {
+            if(confirm('Tem certeza que deseja EXCLUIR permanentemente esta tribo? A tribo sumirá de todos os relatórios.')) {
+                CONFIG.tribos = CONFIG.tribos.filter(x => x.id !== id);
+                delete fotosTribos[id];
+                salvarDB(); renderConfigPainel(); atualizarTela();
+                mostrarToast('Tribo Excluída!', '🗑️');
+            }
+        }
+
+        function adicionarNovaTribo() {
+            const novoId = 't' + Date.now();
+            CONFIG.tribos.push({ id: novoId, nome: 'Nova Tribo', lider: '', emoji: '🏳️', cor: '#888888', oculta: false });
+            salvarDB(); renderConfigPainel(); atualizarTela();
+            mostrarToast('Nova tribo adicionada na lista!', '➕');
+            setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }, 100);
         }
 
         function uploadFotoTribo(id, input) {
@@ -424,7 +479,9 @@
             
             salvarDB(); 
             painelAberto = false; document.getElementById('painelConteudo').classList.remove('aberto'); document.getElementById('iconeToggle').textContent = '▼';
-            renderAbas(); atualizarTela(); mostrarToast('Configurações Salvas!');
+            renderAbas(); atualizarTela();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            mostrarToast('Configurações Salvas!');
         }
 
         function resetarTudo() {
@@ -450,11 +507,17 @@
             const data = document.getElementById('data').value;
             const sem = document.getElementById('semana').value;
             const pInput = document.getElementById('pontosInput');
+            const desc = document.getElementById('descricaoPonto').value || '';
             const pontos = pInput.style.display === 'block' ? (parseInt(pInput.value)||0) : ptsSelecionados;
 
             if(!data || pontos <= 0) return mostrarToast('Insira os pontos!', '⚠️');
+            if(!triboId) return mostrarToast('Crie/Selecione uma Tribo!', '⚠️');
             
-            dados.push({ id: idC++, data, semana: sem, triboId: triboId, pontos });
+            dados.push({ id: idC++, data, semana: sem, triboId: triboId, pontos, descricao: desc });
+            
+            // Limpa descricao após lançamento
+            document.getElementById('descricaoPonto').value = '';
+            
             salvarDB(); atualizarTela();
             
             const t = CONFIG.tribos.find(x=>x.id===triboId);
@@ -487,10 +550,13 @@
             }
 
             document.getElementById('tituloPlacar').textContent = semanaAtiva === 'Geral' ? '🏆 Placar Consolidado' : `📊 Placar: ${semanaAtiva}`;
-            document.getElementById('tribo').innerHTML = CONFIG.tribos.map(t=>`<option value="${t.id}">${t.emoji} ${t.nome}</option>`).join('');
             
-            // TOTAIS DAS TRIBOS
-            document.getElementById('totalGrid').innerHTML = CONFIG.tribos.map(t => {
+            // Render Tribos apenas VISÍVEIS no Dropdown
+            const tribosVisiveis = CONFIG.tribos.filter(t => !t.oculta);
+            document.getElementById('tribo').innerHTML = tribosVisiveis.map(t=>`<option value="${t.id}">${t.emoji} ${t.nome}</option>`).join('');
+            
+            // TOTAIS DAS TRIBOS (Somente Visíveis)
+            document.getElementById('totalGrid').innerHTML = tribosVisiveis.map(t => {
                 const tGeral = dados.filter(d=>d.triboId===t.id).reduce((s,d)=>s+d.pontos,0);
                 const tSemana = dados.filter(d=>d.triboId===t.id && d.semana===semanaAtiva).reduce((s,d)=>s+d.pontos,0);
                 
@@ -511,20 +577,30 @@
                 </div>`;
             }).join('');
 
-            // TOTAL GERAL DA NAÇÃO
-            const somaG = dados.reduce((a,b)=>a+b.pontos,0);
-            const somaS = semanaAtiva !== 'Geral' ? dados.filter(d=>d.semana===semanaAtiva).reduce((a,b)=>a+b.pontos,0) : 0;
+            // TOTAL GERAL DA NAÇÃO (Calcula apenas das tribos que NÃO estão excluídas. Ocultas não contam no total pra não confundir, ou contam? Vou contar apenas das tribos existentes que não estão ocultas)
+            const idsVisiveis = tribosVisiveis.map(t => t.id);
+            const somaG = dados.filter(d => idsVisiveis.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0);
+            const somaS = semanaAtiva !== 'Geral' ? dados.filter(d=>d.semana===semanaAtiva && idsVisiveis.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0) : 0;
             
             if(semanaAtiva === 'Geral') document.getElementById('totalGeral').innerHTML = `<div class="label">Total Arrecadado</div><div class="valor">${fmtStr(somaG)}</div>`;
             else document.getElementById('totalGeral').innerHTML = `<div class="label">Total na ${semanaAtiva}</div><div class="valor" style="color:white; font-size:2.4em;">${fmtStr(somaS)}</div><div class="label" style="font-size:0.8em; margin-top:5px;">Acumulado: <span style="color:var(--fju-amarelo)">${fmtStr(somaG)}</span></div>`;
 
-            // HISTÓRICO
+            // HISTÓRICO (Mostra tudo, mesmo de tribos ocultas, para auditoria visual)
             const histData = semanaAtiva === 'Geral' ? dados : dados.filter(d=>d.semana===semanaAtiva);
             document.getElementById('qtdHistorico').textContent = histData.length;
             document.getElementById('listaTribos').innerHTML = [...histData].reverse().slice(0, 50).map(d => {
                 const t = CONFIG.tribos.find(x=>x.id===d.triboId);
-                return `<div class="tribo-card" style="border-left-color:${t?.cor||'#ccc'}">
-                    <div class="info"><div class="nome">${t?.emoji||'📌'} ${t?.nome||'Desconhecida'}</div><div class="detalhe"><span class="badge-semana">${d.semana}</span> ${fmtData(d.data)}</div></div>
+                const nomeDisplay = t ? t.nome : 'Tribo Excluída';
+                const emojiDisplay = t ? t.emoji : '🗑️';
+                const colorDisplay = t ? t.cor : '#cccccc';
+                const descHtml = d.descricao ? `<div style="font-weight:bold; color:var(--fju-azul-claro); margin-top:2px;">📝 ${d.descricao}</div>` : '';
+
+                return `<div class="tribo-card" style="border-left-color:${colorDisplay}">
+                    <div class="info">
+                        <div class="nome">${emojiDisplay} ${nomeDisplay}</div>
+                        <div class="detalhe"><span class="badge-semana">${d.semana}</span> ${fmtData(d.data)}</div>
+                        ${descHtml}
+                    </div>
                     <div class="acoes"><div class="pontos">+${fmtStr(d.pontos)}</div><button class="btn-mini" onclick="removerPonto(${d.id})">Apagar</button></div>
                 </div>`;
             }).join('');
@@ -537,7 +613,8 @@
             else m += `🏆 *PLACAR GERAL CONSOLIDADO*\n`;
             m += `--------------------------\n\n`;
             
-            CONFIG.tribos.forEach(t => {
+            const tribosVisiveis = CONFIG.tribos.filter(t => !t.oculta);
+            tribosVisiveis.forEach(t => {
                 const g = dados.filter(d=>d.triboId===t.id).reduce((s,d)=>s+d.pontos,0);
                 const s = dados.filter(d=>d.triboId===t.id && d.semana===semanaAtiva).reduce((s,d)=>s+d.pontos,0);
                 m += `${t.emoji} *${t.nome}* ${t.lider ? `(👤 ${t.lider})` : ''}\n`;
@@ -550,12 +627,16 @@
 
         function copiarRelatorioCompleto() {
             if(dados.length === 0) return mostrarToast('Nenhum dado para o relatório.', '⚠️');
+            const tribosVisiveis = CONFIG.tribos.filter(t => !t.oculta);
+            const idsVisiveis = tribosVisiveis.map(t => t.id);
+
             let m = `🏛️ *RELATÓRIO FINAL DE CICLO*\n${CONFIG.simboloFJU} *${CONFIG.tituloNacao} • FJU*\n🎨 ${CONFIG.tema}\n`;
             m += `📅 Período: ${fmtData(CONFIG.dataInicio)} a ${fmtData(CONFIG.dataFim)}\n\n`;
 
             m += `🏆 *TOTAIS GERAIS ACUMULADOS*\n`;
-            const somaG = dados.reduce((a,b)=>a+b.pontos,0);
-            CONFIG.tribos.forEach(t => {
+            const somaG = dados.filter(d => idsVisiveis.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0);
+            
+            tribosVisiveis.forEach(t => {
                 const g = dados.filter(d=>d.triboId===t.id).reduce((s,d)=>s+d.pontos,0);
                 m += `${t.emoji} *${t.nome}* ${t.lider?`(Líder: ${t.lider})`:''}: ${fmtStr(g)} pts\n`;
             });
@@ -563,10 +644,10 @@
 
             m += `📊 *DESEMPENHO POR SEMANA*\n`;
             CONFIG.semanas.forEach(s => {
-                const hasData = dados.some(d=>d.semana === s);
+                const hasData = dados.some(d=>d.semana === s && idsVisiveis.includes(d.triboId));
                 if(hasData) {
                     m += `\n📌 *${s.toUpperCase()}*\n`;
-                    CONFIG.tribos.forEach(t => {
+                    tribosVisiveis.forEach(t => {
                         const ts = dados.filter(d=>d.triboId===t.id && d.semana===s).reduce((sum,d)=>sum+d.pontos,0);
                         if(ts > 0) m += `• ${t.nome}: ${fmtStr(ts)} pts\n`;
                     });
@@ -584,21 +665,26 @@
             csv += `Período: ${fmtData(CONFIG.dataInicio)} a ${fmtData(CONFIG.dataFim)}\n\n`;
 
             csv += `TOTAIS GERAIS\nTribo;Líder;Pontuação\n`;
-            CONFIG.tribos.forEach(t => {
+            CONFIG.tribos.filter(t=>!t.oculta).forEach(t => {
                 const tot = dados.filter(d=>d.triboId===t.id).reduce((s,d)=>s+d.pontos,0);
                 csv += `${t.nome};${t.lider||'Sem líder'};${tot}\n`;
             });
+            
             csv += `\nRESUMO POR SEMANA\nSemana;Tribo;Pontuação\n`;
             CONFIG.semanas.forEach(s => {
-                CONFIG.tribos.forEach(t => {
+                CONFIG.tribos.filter(t=>!t.oculta).forEach(t => {
                     const tot = dados.filter(d=>d.triboId===t.id && d.semana===s).reduce((sum,d)=>sum+d.pontos,0);
                     if(tot > 0) csv += `${s};${t.nome};${tot}\n`;
                 });
             });
-            csv += `\nHISTÓRICO COMPLETO DE LANÇAMENTOS\nData;Semana;Tribo;Pontos\n`;
+            
+            // Coluna de Descrição Adicionada aqui!
+            csv += `\nHISTÓRICO COMPLETO DE LANÇAMENTOS\nData;Semana;Tribo;Pontos;Descrição/Motivo\n`;
             dados.forEach(d => {
                 const t = CONFIG.tribos.find(x=>x.id===d.triboId);
-                csv += `${fmtData(d.data)};${d.semana};${t?.nome};${d.pontos}\n`;
+                const nomeT = t ? t.nome : 'Tribo Excluída';
+                const desc = d.descricao ? d.descricao.replace(/;/g, ',') : 'Sem descrição'; // Evitar quebrar CSV
+                csv += `${fmtData(d.data)};${d.semana};${nomeT};${d.pontos};${desc}\n`;
             });
 
             const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
@@ -632,7 +718,9 @@
 
             div.style.cssText = `position:relative; width:600px; padding:35px; color:white; font-family:sans-serif; box-sizing:border-box; overflow:hidden; border-radius: 15px; ${fnd}`;
 
-            let trH = CONFIG.tribos.map(t => {
+            const tribosVisiveis = CONFIG.tribos.filter(t => !t.oculta);
+            
+            let trH = tribosVisiveis.map(t => {
                 const tG = dados.filter(d=>d.triboId===t.id).reduce((s,d)=>s+d.pontos,0);
                 const tS = semanaAtiva !== 'Geral' ? dados.filter(d=>d.triboId===t.id && d.semana===semanaAtiva).reduce((s,d)=>s+d.pontos,0) : 0;
                 
@@ -656,8 +744,9 @@
                 </div>`;
             }).join('');
 
-            const somaG = dados.reduce((a,b)=>a+b.pontos,0);
-            const somaS = semanaAtiva !== 'Geral' ? dados.filter(d=>d.semana===semanaAtiva).reduce((a,b)=>a+b.pontos,0) : 0;
+            const idsVisiveis = tribosVisiveis.map(t => t.id);
+            const somaG = dados.filter(d => idsVisiveis.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0);
+            const somaS = semanaAtiva !== 'Geral' ? dados.filter(d=>d.semana===semanaAtiva && idsVisiveis.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0) : 0;
             
             let totH = `<div style="font-size:1.1em;color:#8ab4f8;text-transform:uppercase;letter-spacing:2px;font-weight:bold;">🏆 Total Geral Arrecadado</div><div style="font-size:3.5em;font-weight:900;color:var(--fju-amarelo);margin-top:5px;text-shadow:0 4px 10px rgba(0,0,0,0.5);">${fmtStr(somaG)} pts</div>`;
             if(semanaAtiva !== 'Geral') totH = `<div style="font-size:1.1em;color:#8ab4f8;text-transform:uppercase;letter-spacing:2px;font-weight:bold;">🏆 Fechamento da ${semanaAtiva}</div><div style="font-size:3.5em;font-weight:900;color:white;margin-top:5px;text-shadow:0 4px 10px rgba(0,0,0,0.5);line-height:1;">${fmtStr(somaS)}</div><div style="font-size:1.1em;color:var(--fju-amarelo);margin-top:10px;font-weight:bold;">ACUMULADO GERAL: ${fmtStr(somaG)} pts</div>`;
@@ -689,7 +778,6 @@
                     const file = new File([blob], "placar_fju.png", { type: "image/png" });
                     const dataUrl = cv.toDataURL('image/png');
 
-                    // Tentativa 1: Web Share API NATIVA (Padrão para WhatsApp)
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
                         try {
                             await navigator.share({ files: [file], title: 'Placar FJU' });
@@ -698,7 +786,6 @@
                         } catch (err) { console.log('Share nativo cancelado'); }
                     }
 
-                    // Tentativa 2: Fallback Supremo para Mobile -> Modal com a Imagem
                     btn.textContent = '🖼️ Gerar Imagem';
                     document.body.removeChild(wrap);
                     mostrarModalImagem(dataUrl);
