@@ -146,18 +146,22 @@
     <div class="container">
         <div class="toast" id="toast"><span id="toastMessage">Sucesso!</span></div>
 
+        <!-- BANNER PRINCIPAL (Opcional) -->
         <img id="appBanner" class="banner-topo" src="" alt="Banner da Nação">
 
+        <!-- HEADER DA NAÇÃO -->
         <div class="header" id="appHeader">
             <h1><span id="headerTitulo">Nação de Impacto</span> <span class="highlight">•</span> <span id="headerFJU">FJU</span></h1>
             <div style="font-size:0.9em; opacity:0.9; margin-bottom: 10px;">Controle de Pontuação Semanal</div>
             
+            <!-- Logo Dinâmica -->
             <div id="containerLogoFJU">
                 <img id="appLogoFju" class="img-logo-fju" src="" alt="Logo FJU">
                 <div class="logo-fju" id="appLogoText">FJ<span class="u">U</span> <span id="headerSimbolo">⚡</span></div>
             </div>
         </div>
 
+        <!-- FORMULÁRIO RÁPIDO AGORA FICA AQUI EM CIMA -->
         <div class="card-lancamento">
             <div style="display:flex; gap:10px;">
                 <div class="input-group" style="flex:1;"><label>📅 Data</label><input type="date" id="data"></div>
@@ -182,6 +186,7 @@
                 <input type="number" id="pontosInput" placeholder="Digite o valor exato..." style="display:none; margin-top: 10px;">
             </div>
 
+            <!-- DESCRIÇÃO -->
             <div class="input-group">
                 <label>📝 Descrição / Motivo</label>
                 <input type="text" id="descricaoPonto" placeholder="Ex: Tarefa relâmpago, Desafio...">
@@ -190,8 +195,10 @@
             <button class="btn-base btn-azul" style="font-size: 1.1em; padding: 15px;" onclick="adicionarPontos()">➕ Lançar Pontos</button>
         </div>
 
+        <!-- SELETOR DE VISÃO (ABAS) -->
         <div class="tabs-semanas" id="tabsSemanas"></div>
 
+        <!-- PLACAR / TOTAIS -->
         <div class="total-section">
             <h2 id="tituloPlacar">🏆 Placar Consolidado</h2>
             <div class="total-grid" id="totalGrid"></div>
@@ -218,6 +225,7 @@
             </div>
         </div>
 
+        <!-- HISTÓRICO -->
         <div class="historico-section">
             <div class="historico-header">
                 <h3>📋 Últimos Lançamentos</h3>
@@ -226,6 +234,7 @@
             <div class="lista-tribos" id="listaTribos"></div>
         </div>
 
+        <!-- PAINEL DE CONTROLE NO RODAPÉ -->
         <div class="painel-gerenciamento">
             <div class="painel-header" onclick="togglePainel()">
                 <span>⚙️ Configurações (Liderança)</span>
@@ -247,7 +256,15 @@
                     <div class="config-grupo">
                         <h4>🖼️ Identidade Visual e Tema</h4>
                         <div class="config-item"><label>Nome da Nação:</label><input type="text" id="cfgNacao"></div>
-                        <div class="config-item"><label>Tema da Semana:</label><input type="text" id="cfgTema"></div>
+                        
+                        <div class="config-item">
+                            <label>Tema da Semana (Emoji e Nome):</label>
+                            <div style="display:flex; gap:5px;">
+                                <input type="text" id="cfgTemaEmoji" placeholder="🎨" style="width:60px; padding:8px; text-align:center;">
+                                <input type="text" id="cfgTema" placeholder="Nome do Tema" style="flex:1; padding:8px;">
+                            </div>
+                        </div>
+
                         <div class="config-item">
                             <label>Logo Oficial da FJU (Ficará no Topo):</label>
                             <input type="file" accept="image/*" onchange="uploadLogoFju(this)">
@@ -287,7 +304,7 @@
                 { id: 't3', nome: 'Zebulom', lider: '', emoji: '🌿', cor: '#0055A4', oculta: false }
             ],
             semanas: ['1ª Semana', '2ª Semana', '3ª Semana', '4ª Semana', '5ª Semana'],
-            dataInicio: '2026-07-01', dataFim: '2026-08-02', tituloNacao: 'Nação de Impacto', tituloFJU: 'FJU', simboloFJU: '⚡', tema: 'Série: O Bom Soldado'
+            dataInicio: '2026-07-01', dataFim: '2026-08-02', tituloNacao: 'Nação de Impacto', tituloFJU: 'FJU', simboloFJU: '⚡', tema: 'Série: O Bom Soldado', temaEmoji: '🎨'
         };
 
         let dados = [], idC = 0, semanaAtiva = 'Geral', ptsSelecionados = 100000;
@@ -379,7 +396,8 @@
 
         function renderConfigPainel() {
             document.getElementById('cfgNacao').value = CONFIG.tituloNacao;
-            document.getElementById('cfgTema').value = CONFIG.tema;
+            document.getElementById('cfgTema').value = CONFIG.tema || '';
+            document.getElementById('cfgTemaEmoji').value = CONFIG.temaEmoji || '🎨';
             document.getElementById('cfgSemanas').value = CONFIG.semanas.join(', ');
             document.getElementById('cfgInicio').value = CONFIG.dataInicio;
             document.getElementById('cfgFim').value = CONFIG.dataFim;
@@ -487,6 +505,7 @@
         function salvarConfiguracoes() {
             CONFIG.tituloNacao = document.getElementById('cfgNacao').value || 'Nação de Impacto';
             CONFIG.tema = document.getElementById('cfgTema').value;
+            CONFIG.temaEmoji = document.getElementById('cfgTemaEmoji').value || '🎨';
             CONFIG.dataInicio = document.getElementById('cfgInicio').value;
             CONFIG.dataFim = document.getElementById('cfgFim').value;
             const semStr = document.getElementById('cfgSemanas').value;
@@ -604,7 +623,7 @@
             const somaG = dados.filter(d => idsVisiveis.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0);
             const somaS = semanaAtiva !== 'Geral' ? dados.filter(d=>d.semana===semanaAtiva && idsVisiveis.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0) : 0;
             
-            if(semanaAtiva === 'Geral') document.getElementById('totalGeral').innerHTML = `<div class="label">Total Arrecadado</div><div class="valor">${fmtStr(somaG)}</div>`;
+            if(semanaAtiva === 'Geral') document.getElementById('totalGeral').innerHTML = `<div class="label">Total Geral</div><div class="valor">${fmtStr(somaG)}</div>`;
             else document.getElementById('totalGeral').innerHTML = `<div class="label">Total na ${semanaAtiva}</div><div class="valor" style="color:white; font-size:2.4em;">${fmtStr(somaS)}</div><div class="label" style="font-size:0.8em; margin-top:5px;">Acumulado: <span style="color:var(--fju-amarelo)">${fmtStr(somaG)}</span></div>`;
 
             const histData = semanaAtiva === 'Geral' ? dados : dados.filter(d=>d.semana===semanaAtiva);
@@ -629,7 +648,7 @@
 
         // ================= RELATÓRIOS E EXPORTAÇÃO =================
         function copiarTexto() {
-            let m = `🏛️ *${CONFIG.tituloNacao} • FJU*\n🎨 ${CONFIG.tema}\n\n`;
+            let m = `🏛️ *${CONFIG.tituloNacao} • FJU*\n${CONFIG.temaEmoji || '🎨'} ${CONFIG.tema}\n\n`;
             if(semanaAtiva !== 'Geral') m += `📌 *FECHAMENTO: ${semanaAtiva.toUpperCase()}*\n`;
             else m += `🏆 *PLACAR GERAL CONSOLIDADO*\n`;
             m += `--------------------------\n\n`;
@@ -651,7 +670,7 @@
             const tribosVisiveis = CONFIG.tribos.filter(t => !t.oculta);
             const idsVisiveis = tribosVisiveis.map(t => t.id);
 
-            let m = `🏛️ *RELATÓRIO FINAL DE CICLO*\n${CONFIG.simboloFJU} *${CONFIG.tituloNacao} • FJU*\n🎨 ${CONFIG.tema}\n`;
+            let m = `🏛️ *RELATÓRIO FINAL DE CICLO*\n${CONFIG.simboloFJU} *${CONFIG.tituloNacao} • FJU*\n${CONFIG.temaEmoji || '🎨'} ${CONFIG.tema}\n`;
             m += `📅 Período: ${fmtData(CONFIG.dataInicio)} a ${fmtData(CONFIG.dataFim)}\n\n`;
 
             m += `🏆 *TOTAIS GERAIS ACUMULADOS*\n`;
@@ -768,7 +787,7 @@
             const somaG = dados.filter(d => idsVisiveis.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0);
             const somaS = semanaAtiva !== 'Geral' ? dados.filter(d=>d.semana===semanaAtiva && idsVisiveis.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0) : 0;
             
-            let totH = `<div style="font-size:1.1em;color:#8ab4f8;text-transform:uppercase;letter-spacing:2px;font-weight:bold;">🏆 Total Geral Arrecadado</div><div style="font-size:3.5em;font-weight:900;color:var(--fju-amarelo);margin-top:5px;text-shadow:0 4px 10px rgba(0,0,0,0.5);">${fmtStr(somaG)} pts</div>`;
+            let totH = `<div style="font-size:1.1em;color:#8ab4f8;text-transform:uppercase;letter-spacing:2px;font-weight:bold;">🏆 Total Geral</div><div style="font-size:3.5em;font-weight:900;color:var(--fju-amarelo);margin-top:5px;text-shadow:0 4px 10px rgba(0,0,0,0.5);">${fmtStr(somaG)} pts</div>`;
             if(semanaAtiva !== 'Geral') totH = `<div style="font-size:1.1em;color:#8ab4f8;text-transform:uppercase;letter-spacing:2px;font-weight:bold;">🏆 Fechamento da ${semanaAtiva}</div><div style="font-size:3.5em;font-weight:900;color:white;margin-top:5px;text-shadow:0 4px 10px rgba(0,0,0,0.5);line-height:1;">${fmtStr(somaS)}</div><div style="font-size:1.1em;color:var(--fju-amarelo);margin-top:10px;font-weight:bold;">ACUMULADO GERAL: ${fmtStr(somaG)} pts</div>`;
 
             let logoGeradaHtml = `<div style="background:white;color:var(--fju-azul-escuro);display:inline-block;padding:5px 20px;border-radius:20px;font-weight:900;font-size:1.5em;border:3px solid var(--fju-vermelho);margin-bottom:15px;">FJ<span style="color:var(--fju-vermelho)">U</span> ⚡</div>`;
@@ -784,7 +803,7 @@
                         <h1 style="font-size:2.8em;margin:0;letter-spacing:1px;color:white;">${CONFIG.tituloNacao}</h1>
                     </div>
                     <div style="text-align:center;margin:25px 0;padding:12px;background:rgba(255,209,0,0.15);border-radius:10px;border:2px solid rgba(255,209,0,0.4);">
-                        <span style="color:var(--fju-amarelo);font-weight:800;font-size:1.3em;">🎨 ${CONFIG.tema}</span>
+                        <span style="color:var(--fju-amarelo);font-weight:800;font-size:1.3em;">${CONFIG.temaEmoji || '🎨'} ${CONFIG.tema}</span>
                     </div>
                     ${trH}
                     <div style="text-align:center;margin-top:30px;padding-top:25px;border-top:2px solid rgba(255,209,0,0.2);">
