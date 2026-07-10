@@ -106,6 +106,9 @@
 
         .total-section { background: linear-gradient(135deg, var(--fju-azul-escuro), var(--fju-azul-claro)); border-radius: 15px; padding: 20px; margin: 0 15px 20px; color: white; box-shadow: 0 10px 20px rgba(0,45,98,0.2); }
         .total-section h2 { text-align: center; margin-bottom: 15px; font-size: 1.4em; }
+        .select-visao { width: 100%; padding: 12px; border-radius: 10px; border: 2px solid var(--fju-amarelo); background: rgba(255, 255, 255, 0.1); color: var(--fju-amarelo); font-weight: 700; font-size: 1.05em; text-align: center; appearance: none; outline: none; margin-bottom: 15px; }
+        .select-visao option { background: var(--fju-azul-escuro); color: white; }
+
         .total-grid { display: flex; flex-direction: column; gap: 10px; }
         .total-item { background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--fju-amarelo); }
         .total-item .nome-tribo { font-size: 1.1em; font-weight: bold; display: flex; align-items: center; gap: 12px; }
@@ -200,7 +203,11 @@
 
         <!-- PLACAR / TOTAIS -->
         <div class="total-section">
-            <h2 id="tituloPlacar">🏆 Placar Consolidado</h2>
+            <!-- NOVO: Filtro Visão Tribo ou Nação -->
+            <select id="visaoPlacar" class="select-visao" onchange="atualizarTela()">
+                <option value="ALL">👁️ Visão: Nação (Todas as Tribos)</option>
+            </select>
+
             <div class="total-grid" id="totalGrid"></div>
             
             <div class="total-geral" id="totalGeral"></div>
@@ -570,9 +577,23 @@
             document.getElementById('tabsSemanas').innerHTML = html;
         }
 
-        function setSemana(s) { semanaAtiva = s; renderAbas(); atualizarTela(); }
+        function setSemana(s) { semanaAtiva = s; atualizarTela(); }
+
+        // Mudar o Dropdown de Visão Dinamicamente
+        function renderVisaoDropdown() {
+            const select = document.getElementById('visaoPlacar');
+            const atual = select.value || 'ALL';
+            let html = `<option value="ALL">👁️ Visão: Nação (Todas as Tribos)</option>`;
+            CONFIG.tribos.filter(t => !t.oculta).forEach(t => {
+                html += `<option value="${t.id}">👑 Visão: Tribo ${t.nome}</option>`;
+            });
+            select.innerHTML = html;
+            select.value = atual;
+        }
 
         function atualizarTela() {
+            renderVisaoDropdown();
+            
             document.getElementById('headerTitulo').textContent = CONFIG.tituloNacao;
             
             if (logoFjuUrl) {
@@ -593,12 +614,23 @@
                 document.getElementById('appHeader').style.display = 'block';
             }
 
-            document.getElementById('tituloPlacar').textContent = semanaAtiva === 'Geral' ? '🏆 Placar Consolidado' : `📊 Placar: ${semanaAtiva}`;
+            const visaoAtiva = document.getElementById('visaoPlacar').value;
             
+            // Atualiza Título Baseado na Visão
+            if (visaoAtiva === 'ALL') {
+                document.getElementById('tituloPlacar').textContent = semanaAtiva === 'Geral' ? '🏆 Placar Consolidado' : `📊 Placar: ${semanaAtiva}`;
+            } else {
+                const tVisao = CONFIG.tribos.find(t => t.id === visaoAtiva);
+                document.getElementById('tituloPlacar').textContent = semanaAtiva === 'Geral' ? `🏆 Placar: ${tVisao.nome}` : `📊 ${tVisao.nome}: ${semanaAtiva}`;
+            }
+
             const tribosVisiveis = CONFIG.tribos.filter(t => !t.oculta);
             document.getElementById('tribo').innerHTML = tribosVisiveis.map(t=>`<option value="${t.id}">${t.emoji} ${t.nome}</option>`).join('');
             
-            document.getElementById('totalGrid').innerHTML = tribosVisiveis.map(t => {
+            // Determina quais tribos renderizar no placar
+            const tribosRender = visaoAtiva === 'ALL' ? tribosVisiveis : tribosVisiveis.filter(t => t.id === visaoAtiva);
+
+            document.getElementById('totalGrid').innerHTML = tribosRender.map(t => {
                 const tGeral = dados.filter(d=>d.triboId===t.id).reduce((s,d)=>s+d.pontos,0);
                 const tSemana = dados.filter(d=>d.triboId===t.id && d.semana===semanaAtiva).reduce((s,d)=>s+d.pontos,0);
                 
@@ -619,16 +651,21 @@
                 </div>`;
             }).join('');
 
-            const idsVisiveis = tribosVisiveis.map(t => t.id);
-            const somaG = dados.filter(d => idsVisiveis.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0);
-            const somaS = semanaAtiva !== 'Geral' ? dados.filter(d=>d.semana===semanaAtiva && idsVisiveis.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0) : 0;
+            const idsRender = tribosRender.map(t => t.id);
+            const somaG = dados.filter(d => idsRender.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0);
+            const somaS = semanaAtiva !== 'Geral' ? dados.filter(d=>d.semana===semanaAtiva && idsRender.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0) : 0;
             
-            if(semanaAtiva === 'Geral') document.getElementById('totalGeral').innerHTML = `<div class="label">Total Geral</div><div class="valor">${fmtStr(somaG)}</div>`;
+            let labelGeral = visaoAtiva === 'ALL' ? 'Total Arrecadado' : 'Total da Tribo';
+
+            if(semanaAtiva === 'Geral') document.getElementById('totalGeral').innerHTML = `<div class="label">${labelGeral}</div><div class="valor">${fmtStr(somaG)}</div>`;
             else document.getElementById('totalGeral').innerHTML = `<div class="label">Total na ${semanaAtiva}</div><div class="valor" style="color:white; font-size:2.4em;">${fmtStr(somaS)}</div><div class="label" style="font-size:0.8em; margin-top:5px;">Acumulado: <span style="color:var(--fju-amarelo)">${fmtStr(somaG)}</span></div>`;
 
             const histData = semanaAtiva === 'Geral' ? dados : dados.filter(d=>d.semana===semanaAtiva);
-            document.getElementById('qtdHistorico').textContent = histData.length;
-            document.getElementById('listaTribos').innerHTML = [...histData].reverse().slice(0, 50).map(d => {
+            // Filtro de Histórico pela Visão também (opcional, mas fica mais limpo)
+            const histRender = visaoAtiva === 'ALL' ? histData : histData.filter(d => d.triboId === visaoAtiva);
+            
+            document.getElementById('qtdHistorico').textContent = histRender.length;
+            document.getElementById('listaTribos').innerHTML = [...histRender].reverse().slice(0, 50).map(d => {
                 const t = CONFIG.tribos.find(x=>x.id===d.triboId);
                 const nomeDisplay = t ? t.nome : 'Tribo Excluída';
                 const emojiDisplay = t ? t.emoji : '🗑️';
@@ -648,13 +685,16 @@
 
         // ================= RELATÓRIOS E EXPORTAÇÃO =================
         function copiarTexto() {
+            const visaoAtiva = document.getElementById('visaoPlacar').value;
+            const tribosVisiveis = CONFIG.tribos.filter(t => !t.oculta);
+            const tribosRender = visaoAtiva === 'ALL' ? tribosVisiveis : tribosVisiveis.filter(t => t.id === visaoAtiva);
+
             let m = `🏛️ *${CONFIG.tituloNacao} • FJU*\n${CONFIG.temaEmoji || '🎨'} ${CONFIG.tema}\n\n`;
             if(semanaAtiva !== 'Geral') m += `📌 *FECHAMENTO: ${semanaAtiva.toUpperCase()}*\n`;
-            else m += `🏆 *PLACAR GERAL CONSOLIDADO*\n`;
+            else m += `🏆 *${visaoAtiva === 'ALL' ? 'PLACAR GERAL CONSOLIDADO' : 'PLACAR DA TRIBO'}*\n`;
             m += `--------------------------\n\n`;
             
-            const tribosVisiveis = CONFIG.tribos.filter(t => !t.oculta);
-            tribosVisiveis.forEach(t => {
+            tribosRender.forEach(t => {
                 const g = dados.filter(d=>d.triboId===t.id).reduce((s,d)=>s+d.pontos,0);
                 const s = dados.filter(d=>d.triboId===t.id && d.semana===semanaAtiva).reduce((s,d)=>s+d.pontos,0);
                 m += `${t.emoji} *${t.nome}* ${t.lider ? `(👤 ${t.lider})` : ''}\n`;
@@ -757,9 +797,11 @@
 
             div.style.cssText = `position:relative; width:600px; padding:35px; color:white; font-family:sans-serif; box-sizing:border-box; overflow:hidden; border-radius: 15px; ${fnd}`;
 
+            const visaoAtiva = document.getElementById('visaoPlacar').value;
             const tribosVisiveis = CONFIG.tribos.filter(t => !t.oculta);
+            const tribosRender = visaoAtiva === 'ALL' ? tribosVisiveis : tribosVisiveis.filter(t => t.id === visaoAtiva);
             
-            let trH = tribosVisiveis.map(t => {
+            let trH = tribosRender.map(t => {
                 const tG = dados.filter(d=>d.triboId===t.id).reduce((s,d)=>s+d.pontos,0);
                 const tS = semanaAtiva !== 'Geral' ? dados.filter(d=>d.triboId===t.id && d.semana===semanaAtiva).reduce((s,d)=>s+d.pontos,0) : 0;
                 
@@ -783,11 +825,14 @@
                 </div>`;
             }).join('');
 
-            const idsVisiveis = tribosVisiveis.map(t => t.id);
-            const somaG = dados.filter(d => idsVisiveis.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0);
-            const somaS = semanaAtiva !== 'Geral' ? dados.filter(d=>d.semana===semanaAtiva && idsVisiveis.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0) : 0;
+            const idsRender = tribosRender.map(t => t.id);
+            const somaG = dados.filter(d => idsRender.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0);
+            const somaS = semanaAtiva !== 'Geral' ? dados.filter(d=>d.semana===semanaAtiva && idsRender.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0) : 0;
             
-            let totH = `<div style="font-size:1.1em;color:#8ab4f8;text-transform:uppercase;letter-spacing:2px;font-weight:bold;">🏆 Total Geral</div><div style="font-size:3.5em;font-weight:900;color:var(--fju-amarelo);margin-top:5px;text-shadow:0 4px 10px rgba(0,0,0,0.5);">${fmtStr(somaG)} pts</div>`;
+            let labelGeral = visaoAtiva === 'ALL' ? '🏆 Total Geral Arrecadado' : '🏆 Total da Tribo';
+            let labelDesempenho = visaoAtiva === 'ALL' ? '📊 RESULTADO DAS TRIBOS' : '📊 DESEMPENHO DA TRIBO';
+
+            let totH = `<div style="font-size:1.1em;color:#8ab4f8;text-transform:uppercase;letter-spacing:2px;font-weight:bold;">${labelGeral}</div><div style="font-size:3.5em;font-weight:900;color:var(--fju-amarelo);margin-top:5px;text-shadow:0 4px 10px rgba(0,0,0,0.5);">${fmtStr(somaG)} pts</div>`;
             if(semanaAtiva !== 'Geral') totH = `<div style="font-size:1.1em;color:#8ab4f8;text-transform:uppercase;letter-spacing:2px;font-weight:bold;">🏆 Fechamento da ${semanaAtiva}</div><div style="font-size:3.5em;font-weight:900;color:white;margin-top:5px;text-shadow:0 4px 10px rgba(0,0,0,0.5);line-height:1;">${fmtStr(somaS)}</div><div style="font-size:1.1em;color:var(--fju-amarelo);margin-top:10px;font-weight:bold;">ACUMULADO GERAL: ${fmtStr(somaG)} pts</div>`;
 
             let logoGeradaHtml = `<div style="background:white;color:var(--fju-azul-escuro);display:inline-block;padding:5px 20px;border-radius:20px;font-weight:900;font-size:1.5em;border:3px solid var(--fju-vermelho);margin-bottom:15px;">FJ<span style="color:var(--fju-vermelho)">U</span> ⚡</div>`;
@@ -805,7 +850,12 @@
                     <div style="text-align:center;margin:25px 0;padding:12px;background:rgba(255,209,0,0.15);border-radius:10px;border:2px solid rgba(255,209,0,0.4);">
                         <span style="color:var(--fju-amarelo);font-weight:800;font-size:1.3em;">${CONFIG.temaEmoji || '🎨'} ${CONFIG.tema}</span>
                     </div>
-                    ${trH}
+                    
+                    <div style="margin:20px 0;">
+                        <h2 style="text-align:center;font-size:1.4em;color:${CORES_FJU.amarelo};margin-bottom:15px;text-transform:uppercase;">${labelDesempenho}</h2>
+                        ${trH}
+                    </div>
+
                     <div style="text-align:center;margin-top:30px;padding-top:25px;border-top:2px solid rgba(255,209,0,0.2);">
                         ${totH}
                     </div>
