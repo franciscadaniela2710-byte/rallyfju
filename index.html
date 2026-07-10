@@ -92,11 +92,11 @@
         .card-lancamento label { display: block; font-weight: 700; color: var(--fju-azul-escuro); margin-bottom: 8px; font-size: 0.95em; }
         .input-group { margin-bottom: 15px; }
         .input-group select, .input-group input[type="date"], .input-group input[type="text"], .input-group input[type="number"] { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; background: #fafafa; color: var(--fju-azul-escuro); font-weight: 600; }
-        .input-group select:focus, .input-group input[type="text"]:focus { border-color: var(--fju-azul-claro); outline: none; }
+        .input-group select:focus, .input-group input[type="text"]:focus, .input-group input[type="number"]:focus { border-color: var(--fju-azul-claro); outline: none; }
         
-        .grid-atalhos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .grid-atalhos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
         .btn-atalho { background: #f0f0f0; border: 2px solid #ddd; padding: 12px 5px; border-radius: 8px; font-weight: 700; color: var(--fju-azul-escuro); font-size: 0.9em; transition: all 0.2s; }
-        .btn-atalho.active { background: var(--fju-azul-claro); color: white; border-color: var(--fju-azul-escuro); transform: scale(1.05); }
+        .btn-atalho:active { background: var(--fju-azul-claro); color: white; border-color: var(--fju-azul-escuro); transform: scale(0.95); }
 
         /* ========== ABAS E TOTAIS ========== */
         .tabs-semanas { display: flex; gap: 10px; overflow-x: auto; padding: 5px 15px 15px; scrollbar-width: none; }
@@ -176,17 +176,20 @@
                 <select id="tribo"></select>
             </div>
 
+            <!-- MUDANÇA AQUI: CAMPO DE PONTUAÇÃO SEMPRE VISÍVEL -->
             <div class="input-group">
                 <label>⭐ Pontuação</label>
+                <input type="number" id="pontosInput" placeholder="Digite o valor exato..." style="margin-bottom: 10px; font-size: 1.2em; font-weight: bold;">
+                
+                <div style="font-size: 0.85em; color: var(--fju-azul-claro); font-weight: bold; margin-bottom: 8px;">Atalhos rápidos para preencher:</div>
                 <div class="grid-atalhos">
-                    <button class="btn-atalho active" onclick="setPontos(100000, this)">100k</button>
-                    <button class="btn-atalho" onclick="setPontos(50000, this)">50k</button>
-                    <button class="btn-atalho" onclick="setPontos(10000, this)">10k</button>
-                    <button class="btn-atalho" onclick="setPontos(5000, this)">5k</button>
-                    <button class="btn-atalho" onclick="setPontos(1000, this)">1k</button>
-                    <button class="btn-atalho" onclick="setPontos('outro', this)">Outro ✏️</button>
+                    <button class="btn-atalho" onclick="document.getElementById('pontosInput').value=100000">100k</button>
+                    <button class="btn-atalho" onclick="document.getElementById('pontosInput').value=50000">50k</button>
+                    <button class="btn-atalho" onclick="document.getElementById('pontosInput').value=10000">10k</button>
+                    <button class="btn-atalho" onclick="document.getElementById('pontosInput').value=5000">5k</button>
+                    <button class="btn-atalho" onclick="document.getElementById('pontosInput').value=1000">1k</button>
+                    <button class="btn-atalho" style="background:#ffcccc; color:var(--fju-vermelho);" onclick="document.getElementById('pontosInput').value=''">Limpar</button>
                 </div>
-                <input type="number" id="pontosInput" placeholder="Digite o valor exato..." style="display:none; margin-top: 10px;">
             </div>
 
             <!-- DESCRIÇÃO -->
@@ -203,7 +206,7 @@
 
         <!-- PLACAR / TOTAIS -->
         <div class="total-section">
-            <!-- NOVO: Filtro Visão Tribo ou Nação -->
+            <!-- Filtro Visão Tribo ou Nação -->
             <select id="visaoPlacar" class="select-visao" onchange="atualizarTela()">
                 <option value="ALL">👁️ Visão: Nação (Todas as Tribos)</option>
             </select>
@@ -314,7 +317,7 @@
             dataInicio: '2026-07-01', dataFim: '2026-08-02', tituloNacao: 'Nação de Impacto', tituloFJU: 'FJU', simboloFJU: '⚡', tema: 'Série: O Bom Soldado', temaEmoji: '🎨'
         };
 
-        let dados = [], idC = 0, semanaAtiva = 'Geral', ptsSelecionados = 100000;
+        let dados = [], idC = 0, semanaAtiva = 'Geral';
         let arteUrl = '', bannerMainUrl = '', logoFjuUrl = '';
         let fotosTribos = {};
 
@@ -536,28 +539,22 @@
         function fmtStr(n) { return n.toLocaleString('pt-BR'); }
         function fmtData(d) { return d.split('-').reverse().join('/'); }
 
-        function setPontos(v, btn) {
-            document.querySelectorAll('.btn-atalho').forEach(b=>b.classList.remove('active'));
-            btn.classList.add('active');
-            const inp = document.getElementById('pontosInput');
-            if (v === 'outro') { inp.style.display = 'block'; inp.focus(); ptsSelecionados = 0; }
-            else { inp.style.display = 'none'; inp.value = ''; ptsSelecionados = v; }
-        }
-
         function adicionarPontos() {
             const triboId = document.getElementById('tribo').value;
             const data = document.getElementById('data').value;
             const sem = document.getElementById('semana').value;
             const pInput = document.getElementById('pontosInput');
             const desc = document.getElementById('descricaoPonto').value || '';
-            const pontos = pInput.style.display === 'block' ? (parseInt(pInput.value)||0) : ptsSelecionados;
+            const pontos = parseInt(pInput.value) || 0;
 
-            if(!data || pontos <= 0) return mostrarToast('Insira os pontos!', '⚠️');
+            if(!data || pontos <= 0) return mostrarToast('Insira os pontos na caixa de Pontuação!', '⚠️');
             if(!triboId) return mostrarToast('Crie/Selecione uma Tribo!', '⚠️');
             
             dados.push({ id: idC++, data, semana: sem, triboId: triboId, pontos, descricao: desc });
             
+            // Limpa o formulário para o próximo lançamento
             document.getElementById('descricaoPonto').value = '';
+            pInput.value = '';
             
             salvarDB(); atualizarTela();
             
@@ -655,13 +652,12 @@
             const somaG = dados.filter(d => idsRender.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0);
             const somaS = semanaAtiva !== 'Geral' ? dados.filter(d=>d.semana===semanaAtiva && idsRender.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0) : 0;
             
-            let labelGeral = visaoAtiva === 'ALL' ? 'Total Arrecadado' : 'Total da Tribo';
+            let labelGeral = visaoAtiva === 'ALL' ? '🏆 Total Geral' : '🏆 Total da Tribo';
 
             if(semanaAtiva === 'Geral') document.getElementById('totalGeral').innerHTML = `<div class="label">${labelGeral}</div><div class="valor">${fmtStr(somaG)}</div>`;
             else document.getElementById('totalGeral').innerHTML = `<div class="label">Total na ${semanaAtiva}</div><div class="valor" style="color:white; font-size:2.4em;">${fmtStr(somaS)}</div><div class="label" style="font-size:0.8em; margin-top:5px;">Acumulado: <span style="color:var(--fju-amarelo)">${fmtStr(somaG)}</span></div>`;
 
             const histData = semanaAtiva === 'Geral' ? dados : dados.filter(d=>d.semana===semanaAtiva);
-            // Filtro de Histórico pela Visão também (opcional, mas fica mais limpo)
             const histRender = visaoAtiva === 'ALL' ? histData : histData.filter(d => d.triboId === visaoAtiva);
             
             document.getElementById('qtdHistorico').textContent = histRender.length;
