@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -30,12 +31,11 @@
         }
 
         /* ========== BANNER & HEADER ========== */
-        /* AJUSTE NO BANNER: Agora ele nunca mais corta a imagem (object-fit: contain) e adapta a altura */
         .banner-topo { 
             width: 100%; 
             height: auto; 
             max-height: 350px; 
-            object-fit: contain; 
+            object-fit: contain; /* Isso garante que a imagem NUNCA corte */
             display: none; 
             background: var(--fju-azul-escuro);
             border-bottom-left-radius: 20px;
@@ -104,11 +104,11 @@
         .card-lancamento label { display: block; font-weight: 700; color: var(--fju-azul-escuro); margin-bottom: 8px; font-size: 0.95em; }
         .input-group { margin-bottom: 15px; }
         .input-group select, .input-group input[type="date"], .input-group input[type="text"], .input-group input[type="number"] { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; background: #fafafa; color: var(--fju-azul-escuro); font-weight: 600; }
-        .input-group select:focus, .input-group input[type="text"]:focus { border-color: var(--fju-azul-claro); outline: none; }
+        .input-group select:focus, .input-group input[type="text"]:focus, .input-group input[type="number"]:focus { border-color: var(--fju-azul-claro); outline: none; }
         
-        .grid-atalhos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-        .btn-atalho { background: #f0f0f0; border: 2px solid #ddd; padding: 12px 5px; border-radius: 8px; font-weight: 700; color: var(--fju-azul-escuro); font-size: 0.9em; transition: all 0.2s; }
-        .btn-atalho.active { background: var(--fju-azul-claro); color: white; border-color: var(--fju-azul-escuro); transform: scale(1.05); }
+        .grid-atalhos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+        .btn-atalho { background: #f0f0f0; border: 2px solid #ddd; padding: 12px 5px; border-radius: 8px; font-weight: 700; color: var(--fju-azul-escuro); font-size: 0.9em; transition: all 0.2s; cursor: pointer; }
+        .btn-atalho.active { background: var(--fju-azul-claro); color: white; border-color: var(--fju-azul-escuro); transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
 
         /* ========== ABAS E TOTAIS ========== */
         .tabs-semanas { display: flex; gap: 10px; overflow-x: auto; padding: 5px 15px 15px; scrollbar-width: none; }
@@ -161,7 +161,7 @@
     <div class="container">
         <div class="toast" id="toast"><span id="toastMessage">Sucesso!</span></div>
 
-        <!-- BANNER PRINCIPAL -->
+        <!-- BANNER PRINCIPAL (NUNCA MAIS CORTA) -->
         <img id="appBanner" class="banner-topo" src="" alt="Banner da Nação">
 
         <!-- HEADER DA NAÇÃO -->
@@ -183,10 +183,13 @@
                 <div class="input-group" style="flex:1;"><label>🗓️ Semana</label><select id="semana"></select></div>
             </div>
             
+            <!-- NOVO SISTEMA DE TRIBOS - À PROVA DE BUGS NO CELULAR -->
             <div class="input-group">
                 <label>👑 Selecione a Tribo</label>
-                <!-- Alterado para funcionar 100% no celular garantindo que a lista sempre abre -->
-                <select id="tribo"></select>
+                <div id="gridTribosSelect" class="grid-atalhos">
+                    <!-- Os botões de tribos vão aparecer aqui -->
+                </div>
+                <input type="hidden" id="tribo" value="">
             </div>
 
             <div class="input-group">
@@ -195,11 +198,11 @@
                 
                 <div style="font-size: 0.85em; color: var(--fju-azul-claro); font-weight: bold; margin-bottom: 8px;">Atalhos rápidos para preencher:</div>
                 <div class="grid-atalhos">
-                    <button class="btn-atalho active" onclick="setPontos(100000, this)">100k</button>
-                    <button class="btn-atalho" onclick="setPontos(50000, this)">50k</button>
-                    <button class="btn-atalho" onclick="setPontos(10000, this)">10k</button>
-                    <button class="btn-atalho" onclick="setPontos(5000, this)">5k</button>
-                    <button class="btn-atalho" onclick="setPontos(1000, this)">1k</button>
+                    <button class="btn-atalho" onclick="document.getElementById('pontosInput').value=100000">100k</button>
+                    <button class="btn-atalho" onclick="document.getElementById('pontosInput').value=50000">50k</button>
+                    <button class="btn-atalho" onclick="document.getElementById('pontosInput').value=10000">10k</button>
+                    <button class="btn-atalho" onclick="document.getElementById('pontosInput').value=5000">5k</button>
+                    <button class="btn-atalho" onclick="document.getElementById('pontosInput').value=1000">1k</button>
                     <button class="btn-atalho" style="background:#ffcccc; color:var(--fju-vermelho);" onclick="document.getElementById('pontosInput').value=''">Limpar</button>
                 </div>
             </div>
@@ -329,7 +332,7 @@
             dataInicio: '2026-07-01', dataFim: '2026-08-02', tituloNacao: 'Nação de Impacto', tituloFJU: 'FJU', simboloFJU: '⚡', tema: 'Série: O Bom Soldado', temaEmoji: '🎨'
         };
 
-        let dados = [], idC = 0, semanaAtiva = 'Geral', ptsSelecionados = 100000;
+        let dados = [], idC = 0, semanaAtiva = 'Geral';
         let arteUrl = '', bannerMainUrl = '', logoFjuUrl = '';
         let fotosTribos = {};
 
@@ -541,7 +544,6 @@
         }
 
         function salvarConfiguracoes() {
-            // Salva configurações gerais
             CONFIG.tituloNacao = document.getElementById('cfgNacao').value || 'Nação de Impacto';
             CONFIG.tema = document.getElementById('cfgTema').value;
             CONFIG.temaEmoji = document.getElementById('cfgTemaEmoji').value || '🎨';
@@ -551,8 +553,6 @@
             CONFIG.semanas = semStr.split(',').map(s=>s.trim()).filter(s=>s);
             if(CONFIG.semanas.length===0) CONFIG.semanas=['1ª Semana'];
             
-            // NOVIDADE CRUCIAL: Salva automaticamente os campos de texto de TODAS as tribos que estão na tela
-            // Assim não precisa clicar em "salvar tribo" individualmente se só trocou uma letrinha e quis fechar rápido.
             CONFIG.tribos.forEach(t => {
                 const elNome = document.getElementById(`cfgNome_${t.id}`);
                 if(elNome) {
@@ -583,12 +583,12 @@
         function fmtStr(n) { return n.toLocaleString('pt-BR'); }
         function fmtData(d) { return d.split('-').reverse().join('/'); }
 
-        function setPontos(v, btn) {
-            document.querySelectorAll('.btn-atalho').forEach(b=>b.classList.remove('active'));
+        // NOVO: Função para selecionar Tribo Visualmente
+        function selecionarTribo(id, btn) {
+            document.getElementById('tribo').value = id;
+            const botoes = document.getElementById('gridTribosSelect').querySelectorAll('.btn-atalho');
+            botoes.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            const inp = document.getElementById('pontosInput');
-            if (v === 'outro') { inp.style.display = 'block'; inp.focus(); ptsSelecionados = 0; }
-            else { inp.style.display = 'none'; inp.value = ''; ptsSelecionados = v; }
         }
 
         function adicionarPontos() {
@@ -597,14 +597,15 @@
             const sem = document.getElementById('semana').value;
             const pInput = document.getElementById('pontosInput');
             const desc = document.getElementById('descricaoPonto').value || '';
-            const pontos = pInput.style.display === 'block' ? (parseInt(pInput.value)||0) : ptsSelecionados;
+            const pontos = parseInt(pInput.value) || 0;
 
             if(!data || pontos <= 0) return mostrarToast('Insira os pontos na caixa de Pontuação!', '⚠️');
-            if(!triboId || triboId === "") return mostrarToast('Selecione uma Tribo!', '⚠️');
+            if(!triboId || triboId === "") return mostrarToast('Toque no botão de uma Tribo para selecionar!', '⚠️');
             
             dados.push({ id: idC++, data, semana: sem, triboId: triboId, pontos, descricao: desc });
             
             document.getElementById('descricaoPonto').value = '';
+            pInput.value = '';
             
             salvarDB(); atualizarTela();
             
@@ -669,16 +670,21 @@
                 document.getElementById('tituloPlacar').textContent = semanaAtiva === 'Geral' ? `🏆 Placar: ${tVisao.nome}` : `📊 ${tVisao.nome}: ${semanaAtiva}`;
             }
 
-            // CRUCIAL: Preencher lista de Tribos no Formulário
+            // CRUCIAL: Renderiza a NOVA lista de Tribos em Botões Fixos
             const tribosVisiveis = CONFIG.tribos.filter(t => t.oculta !== true);
-            const selectTribo = document.getElementById('tribo');
+            const gridTribos = document.getElementById('gridTribosSelect');
+            const triboSelecionada = document.getElementById('tribo').value;
+            
             if (tribosVisiveis.length === 0) {
-                selectTribo.innerHTML = '<option value="">⚠️ Nenhuma Tribo Ativa. Vá no painel.</option>';
+                gridTribos.innerHTML = '<div style="color:red; font-size:0.9em; grid-column: 1 / -1;">⚠️ Nenhuma Tribo Ativa. Vá no painel.</div>';
             } else {
-                selectTribo.innerHTML = '<option value="">👉 Toque para Selecionar a Tribo...</option>' + 
-                                        tribosVisiveis.map(t=>`<option value="${t.id}">${t.emoji} ${t.nome}</option>`).join('');
+                gridTribos.innerHTML = tribosVisiveis.map(t => {
+                    const isActive = t.id === triboSelecionada ? 'active' : '';
+                    return `<button class="btn-atalho ${isActive}" style="border: 2px solid ${t.cor};" onclick="selecionarTribo('${t.id}', this)">${t.emoji} ${t.nome}</button>`;
+                }).join('');
             }
             
+            // Determina quais tribos renderizar no placar
             const tribosRender = visaoAtiva === 'ALL' ? tribosVisiveis : tribosVisiveis.filter(t => t.id === visaoAtiva);
 
             document.getElementById('totalGrid').innerHTML = tribosRender.map(t => {
