@@ -30,7 +30,19 @@
         }
 
         /* ========== BANNER & HEADER ========== */
-        .banner-topo { width: 100%; max-height: 180px; object-fit: cover; display: none; }
+        /* AJUSTE NO BANNER: Agora ele nunca mais corta a imagem (object-fit: contain) e adapta a altura */
+        .banner-topo { 
+            width: 100%; 
+            height: auto; 
+            max-height: 350px; 
+            object-fit: contain; 
+            display: none; 
+            background: var(--fju-azul-escuro);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
         
         .header { 
             background: linear-gradient(135deg, var(--fju-azul-escuro), var(--fju-azul-claro)); 
@@ -92,11 +104,11 @@
         .card-lancamento label { display: block; font-weight: 700; color: var(--fju-azul-escuro); margin-bottom: 8px; font-size: 0.95em; }
         .input-group { margin-bottom: 15px; }
         .input-group select, .input-group input[type="date"], .input-group input[type="text"], .input-group input[type="number"] { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; background: #fafafa; color: var(--fju-azul-escuro); font-weight: 600; }
-        .input-group select:focus, .input-group input[type="text"]:focus, .input-group input[type="number"]:focus { border-color: var(--fju-azul-claro); outline: none; }
+        .input-group select:focus, .input-group input[type="text"]:focus { border-color: var(--fju-azul-claro); outline: none; }
         
-        .grid-atalhos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+        .grid-atalhos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .btn-atalho { background: #f0f0f0; border: 2px solid #ddd; padding: 12px 5px; border-radius: 8px; font-weight: 700; color: var(--fju-azul-escuro); font-size: 0.9em; transition: all 0.2s; }
-        .btn-atalho:active { background: var(--fju-azul-claro); color: white; border-color: var(--fju-azul-escuro); transform: scale(0.95); }
+        .btn-atalho.active { background: var(--fju-azul-claro); color: white; border-color: var(--fju-azul-escuro); transform: scale(1.05); }
 
         /* ========== ABAS E TOTAIS ========== */
         .tabs-semanas { display: flex; gap: 10px; overflow-x: auto; padding: 5px 15px 15px; scrollbar-width: none; }
@@ -173,10 +185,10 @@
             
             <div class="input-group">
                 <label>👑 Selecione a Tribo</label>
+                <!-- Ajuste no Select para forçar o usuário a escolher e evitar bugs no mobile -->
                 <select id="tribo"></select>
             </div>
 
-            <!-- MUDANÇA AQUI: CAMPO DE PONTUAÇÃO SEMPRE VISÍVEL -->
             <div class="input-group">
                 <label>⭐ Pontuação</label>
                 <input type="number" id="pontosInput" placeholder="Digite o valor exato..." style="margin-bottom: 10px; font-size: 1.2em; font-weight: bold;">
@@ -327,14 +339,21 @@
                 const slv = JSON.parse(localStorage.getItem('fjuDataV3'));
                 if (slv) { 
                     dados = slv.dados || []; idC = slv.idC || 0; 
-                    CONFIG = Object.assign(CONFIG, slv.CONFIG); 
+                    if(slv.CONFIG) CONFIG = Object.assign(CONFIG, slv.CONFIG); 
                     fotosTribos = slv.fotosTribos || {};
                     arteUrl = slv.arteUrl || '';
                     bannerMainUrl = slv.bannerMainUrl || '';
                     logoFjuUrl = slv.logoFjuUrl || '';
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.error("Erro ao ler LocalStorage", e);
+            }
             
+            // Tratamento contra dados corrompidos
+            if (!CONFIG.tribos || CONFIG.tribos.length === 0) {
+                CONFIG.tribos = [{ id: 't1', nome: 'Judá', lider: '', emoji: '🦁', cor: '#FFD100', oculta: false }];
+            }
+
             CONFIG.tribos.forEach(t => { if(t.oculta === undefined) t.oculta = false; });
             dados.forEach(d => { if(d.descricao === undefined) d.descricao = ''; });
 
@@ -548,7 +567,7 @@
             const pontos = parseInt(pInput.value) || 0;
 
             if(!data || pontos <= 0) return mostrarToast('Insira os pontos na caixa de Pontuação!', '⚠️');
-            if(!triboId) return mostrarToast('Crie/Selecione uma Tribo!', '⚠️');
+            if(!triboId || triboId === "") return mostrarToast('Crie/Selecione uma Tribo!', '⚠️');
             
             dados.push({ id: idC++, data, semana: sem, triboId: triboId, pontos, descricao: desc });
             
@@ -622,7 +641,9 @@
             }
 
             const tribosVisiveis = CONFIG.tribos.filter(t => !t.oculta);
-            document.getElementById('tribo').innerHTML = tribosVisiveis.map(t=>`<option value="${t.id}">${t.emoji} ${t.nome}</option>`).join('');
+            
+            // Correção crucial: Se a tribo estiver vazia, instrua a selecionar
+            document.getElementById('tribo').innerHTML = '<option value="" disabled selected>👉 Toque para Selecionar...</option>' + tribosVisiveis.map(t=>`<option value="${t.id}">${t.emoji} ${t.nome}</option>`).join('');
             
             // Determina quais tribos renderizar no placar
             const tribosRender = visaoAtiva === 'ALL' ? tribosVisiveis : tribosVisiveis.filter(t => t.id === visaoAtiva);
@@ -652,7 +673,7 @@
             const somaG = dados.filter(d => idsRender.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0);
             const somaS = semanaAtiva !== 'Geral' ? dados.filter(d=>d.semana===semanaAtiva && idsRender.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0) : 0;
             
-            let labelGeral = visaoAtiva === 'ALL' ? '🏆 Total Geral' : '🏆 Total da Tribo';
+            let labelGeral = visaoAtiva === 'ALL' ? '🏆 Total Geral Arrecadado' : '🏆 Total da Tribo';
 
             if(semanaAtiva === 'Geral') document.getElementById('totalGeral').innerHTML = `<div class="label">${labelGeral}</div><div class="valor">${fmtStr(somaG)}</div>`;
             else document.getElementById('totalGeral').innerHTML = `<div class="label">Total na ${semanaAtiva}</div><div class="valor" style="color:white; font-size:2.4em;">${fmtStr(somaS)}</div><div class="label" style="font-size:0.8em; margin-top:5px;">Acumulado: <span style="color:var(--fju-amarelo)">${fmtStr(somaG)}</span></div>`;
