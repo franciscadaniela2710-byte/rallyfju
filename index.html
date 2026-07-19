@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -35,7 +34,7 @@
             width: 100%; 
             height: auto; 
             max-height: 350px; 
-            object-fit: contain; /* Isso garante que a imagem NUNCA corte */
+            object-fit: contain; 
             display: none; 
             background: var(--fju-azul-escuro);
             border-bottom-left-radius: 20px;
@@ -107,8 +106,10 @@
         .input-group select:focus, .input-group input[type="text"]:focus, .input-group input[type="number"]:focus { border-color: var(--fju-azul-claro); outline: none; }
         
         .grid-atalhos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+        .grid-tribos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 10px; }
+        
         .btn-atalho { background: #f0f0f0; border: 2px solid #ddd; padding: 12px 5px; border-radius: 8px; font-weight: 700; color: var(--fju-azul-escuro); font-size: 0.9em; transition: all 0.2s; cursor: pointer; }
-        .btn-atalho.active { background: var(--fju-azul-claro); color: white; border-color: var(--fju-azul-escuro); transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .btn-atalho.active { background: var(--fju-azul-claro); color: white; border-color: var(--fju-azul-escuro) !important; transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
 
         /* ========== ABAS E TOTAIS ========== */
         .tabs-semanas { display: flex; gap: 10px; overflow-x: auto; padding: 5px 15px 15px; scrollbar-width: none; }
@@ -176,18 +177,18 @@
             </div>
         </div>
 
-        <!-- FORMULÁRIO RÁPIDO AGORA FICA AQUI EM CIMA -->
+        <!-- FORMULÁRIO RÁPIDO -->
         <div class="card-lancamento">
             <div style="display:flex; gap:10px;">
                 <div class="input-group" style="flex:1;"><label>📅 Data</label><input type="date" id="data"></div>
                 <div class="input-group" style="flex:1;"><label>🗓️ Semana</label><select id="semana"></select></div>
             </div>
             
-            <!-- NOVO SISTEMA DE TRIBOS - À PROVA DE BUGS NO CELULAR -->
+            <!-- SELETOR DE TRIBO COM BOTÕES (SOLUÇÃO DEFINITIVA PARA CELULAR) -->
             <div class="input-group">
                 <label>👑 Selecione a Tribo</label>
-                <div id="gridTribosSelect" class="grid-atalhos">
-                    <!-- Os botões de tribos vão aparecer aqui -->
+                <div id="gridTribosSelect" class="grid-tribos">
+                    <!-- Os botões das tribos vão aparecer aqui automaticamente -->
                 </div>
                 <input type="hidden" id="tribo" value="">
             </div>
@@ -357,11 +358,8 @@
                     bannerMainUrl = slv.bannerMainUrl || '';
                     logoFjuUrl = slv.logoFjuUrl || '';
                 }
-            } catch (e) {
-                console.error("Erro ao carregar dados antigos", e);
-            }
+            } catch (e) {}
             
-            // Garantir que exista tribo base em caso de corrupção
             if (!CONFIG.tribos || CONFIG.tribos.length === 0) {
                 CONFIG.tribos = [{ id: 't1', nome: 'Judá', lider: '', emoji: '🦁', cor: '#FFD100', oculta: false }];
             }
@@ -384,13 +382,13 @@
             t.classList.add('ativo'); setTimeout(() => t.classList.remove('ativo'), 3000);
         }
 
-        // ================= COMPARTILHAMENTO INTELIGENTE MOBILE =================
+        // ================= COMPARTILHAMENTO INTELIGENTE =================
         async function compartilharViaCelular(texto) {
             if (navigator.share) {
                 try {
                     await navigator.share({ text: texto });
                     return true;
-                } catch (e) { console.log("Compartilhamento nativo cancelado"); }
+                } catch (e) {}
             }
             try {
                 await navigator.clipboard.writeText(texto);
@@ -583,7 +581,7 @@
         function fmtStr(n) { return n.toLocaleString('pt-BR'); }
         function fmtData(d) { return d.split('-').reverse().join('/'); }
 
-        // NOVO: Função para selecionar Tribo Visualmente
+        // NOVA FUNÇÃO: Botões de Tribo
         function selecionarTribo(id, btn) {
             document.getElementById('tribo').value = id;
             const botoes = document.getElementById('gridTribosSelect').querySelectorAll('.btn-atalho');
@@ -606,6 +604,7 @@
             
             document.getElementById('descricaoPonto').value = '';
             pInput.value = '';
+            document.getElementById('tribo').value = ''; // Limpa a seleção da tribo
             
             salvarDB(); atualizarTela();
             
@@ -670,21 +669,20 @@
                 document.getElementById('tituloPlacar').textContent = semanaAtiva === 'Geral' ? `🏆 Placar: ${tVisao.nome}` : `📊 ${tVisao.nome}: ${semanaAtiva}`;
             }
 
-            // CRUCIAL: Renderiza a NOVA lista de Tribos em Botões Fixos
+            // CARREGA OS BOTÕES DAS TRIBOS NO FORMULÁRIO (Substituindo o select antigo)
             const tribosVisiveis = CONFIG.tribos.filter(t => t.oculta !== true);
             const gridTribos = document.getElementById('gridTribosSelect');
             const triboSelecionada = document.getElementById('tribo').value;
             
             if (tribosVisiveis.length === 0) {
-                gridTribos.innerHTML = '<div style="color:red; font-size:0.9em; grid-column: 1 / -1;">⚠️ Nenhuma Tribo Ativa. Vá no painel.</div>';
+                gridTribos.innerHTML = '<div style="color:red; font-weight:bold; grid-column: 1 / -1;">⚠️ Crie ou mostre as tribos no painel abaixo.</div>';
             } else {
                 gridTribos.innerHTML = tribosVisiveis.map(t => {
                     const isActive = t.id === triboSelecionada ? 'active' : '';
-                    return `<button class="btn-atalho ${isActive}" style="border: 2px solid ${t.cor};" onclick="selecionarTribo('${t.id}', this)">${t.emoji} ${t.nome}</button>`;
+                    return `<button class="btn-atalho ${isActive}" style="border: 2px solid ${t.cor}; padding: 12px 5px; font-size: 1.05em;" onclick="selecionarTribo('${t.id}', this)">${t.emoji} ${t.nome}</button>`;
                 }).join('');
             }
             
-            // Determina quais tribos renderizar no placar
             const tribosRender = visaoAtiva === 'ALL' ? tribosVisiveis : tribosVisiveis.filter(t => t.id === visaoAtiva);
 
             document.getElementById('totalGrid').innerHTML = tribosRender.map(t => {
