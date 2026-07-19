@@ -161,7 +161,7 @@
     <div class="container">
         <div class="toast" id="toast"><span id="toastMessage">Sucesso!</span></div>
 
-        <!-- BANNER PRINCIPAL (Opcional) -->
+        <!-- BANNER PRINCIPAL -->
         <img id="appBanner" class="banner-topo" src="" alt="Banner da Nação">
 
         <!-- HEADER DA NAÇÃO -->
@@ -185,7 +185,7 @@
             
             <div class="input-group">
                 <label>👑 Selecione a Tribo</label>
-                <!-- Ajuste no Select para forçar o usuário a escolher e evitar bugs no mobile -->
+                <!-- Alterado para funcionar 100% no celular garantindo que a lista sempre abre -->
                 <select id="tribo"></select>
             </div>
 
@@ -195,11 +195,11 @@
                 
                 <div style="font-size: 0.85em; color: var(--fju-azul-claro); font-weight: bold; margin-bottom: 8px;">Atalhos rápidos para preencher:</div>
                 <div class="grid-atalhos">
-                    <button class="btn-atalho" onclick="document.getElementById('pontosInput').value=100000">100k</button>
-                    <button class="btn-atalho" onclick="document.getElementById('pontosInput').value=50000">50k</button>
-                    <button class="btn-atalho" onclick="document.getElementById('pontosInput').value=10000">10k</button>
-                    <button class="btn-atalho" onclick="document.getElementById('pontosInput').value=5000">5k</button>
-                    <button class="btn-atalho" onclick="document.getElementById('pontosInput').value=1000">1k</button>
+                    <button class="btn-atalho active" onclick="setPontos(100000, this)">100k</button>
+                    <button class="btn-atalho" onclick="setPontos(50000, this)">50k</button>
+                    <button class="btn-atalho" onclick="setPontos(10000, this)">10k</button>
+                    <button class="btn-atalho" onclick="setPontos(5000, this)">5k</button>
+                    <button class="btn-atalho" onclick="setPontos(1000, this)">1k</button>
                     <button class="btn-atalho" style="background:#ffcccc; color:var(--fju-vermelho);" onclick="document.getElementById('pontosInput').value=''">Limpar</button>
                 </div>
             </div>
@@ -329,7 +329,7 @@
             dataInicio: '2026-07-01', dataFim: '2026-08-02', tituloNacao: 'Nação de Impacto', tituloFJU: 'FJU', simboloFJU: '⚡', tema: 'Série: O Bom Soldado', temaEmoji: '🎨'
         };
 
-        let dados = [], idC = 0, semanaAtiva = 'Geral';
+        let dados = [], idC = 0, semanaAtiva = 'Geral', ptsSelecionados = 100000;
         let arteUrl = '', bannerMainUrl = '', logoFjuUrl = '';
         let fotosTribos = {};
 
@@ -339,17 +339,26 @@
                 const slv = JSON.parse(localStorage.getItem('fjuDataV3'));
                 if (slv) { 
                     dados = slv.dados || []; idC = slv.idC || 0; 
-                    if(slv.CONFIG) CONFIG = Object.assign(CONFIG, slv.CONFIG); 
+                    if(slv.CONFIG) {
+                        CONFIG.tituloNacao = slv.CONFIG.tituloNacao || CONFIG.tituloNacao;
+                        CONFIG.tema = slv.CONFIG.tema || CONFIG.tema;
+                        CONFIG.temaEmoji = slv.CONFIG.temaEmoji || CONFIG.temaEmoji;
+                        CONFIG.dataInicio = slv.CONFIG.dataInicio || CONFIG.dataInicio;
+                        CONFIG.dataFim = slv.CONFIG.dataFim || CONFIG.dataFim;
+                        CONFIG.semanas = slv.CONFIG.semanas || CONFIG.semanas;
+                        CONFIG.simboloFJU = slv.CONFIG.simboloFJU || CONFIG.simboloFJU;
+                        if (slv.CONFIG.tribos) CONFIG.tribos = slv.CONFIG.tribos;
+                    }
                     fotosTribos = slv.fotosTribos || {};
                     arteUrl = slv.arteUrl || '';
                     bannerMainUrl = slv.bannerMainUrl || '';
                     logoFjuUrl = slv.logoFjuUrl || '';
                 }
             } catch (e) {
-                console.error("Erro ao ler LocalStorage", e);
+                console.error("Erro ao carregar dados antigos", e);
             }
             
-            // Tratamento contra dados corrompidos
+            // Garantir que exista tribo base em caso de corrupção
             if (!CONFIG.tribos || CONFIG.tribos.length === 0) {
                 CONFIG.tribos = [{ id: 't1', nome: 'Judá', lider: '', emoji: '🦁', cor: '#FFD100', oculta: false }];
             }
@@ -451,7 +460,7 @@
                     </div>
                     <input type="text" id="cfgLider_${t.id}" value="${t.lider||''}" placeholder="Nome do Cabeça da Tribo" style="width:100%; padding:8px; margin-bottom:5px;">
                     
-                    <button class="btn-base btn-amarelo" style="padding:6px; font-size:0.8em; margin-bottom:5px;" onclick="salvarTribo('${t.id}')">💾 Salvar Alteração</button>
+                    <button class="btn-base btn-amarelo" style="padding:6px; font-size:0.8em; margin-bottom:5px;" onclick="salvarTribo('${t.id}')">💾 Salvar Alteração de Tribo individual</button>
                     
                     <div style="display:flex; gap:5px;">
                         <button class="btn-base" style="background:${bgOcultar}; color:white; padding:6px; font-size:0.8em; flex:1;" onclick="toggleOcultarTribo('${t.id}')">${btnOcultarText}</button>
@@ -532,6 +541,7 @@
         }
 
         function salvarConfiguracoes() {
+            // Salva configurações gerais
             CONFIG.tituloNacao = document.getElementById('cfgNacao').value || 'Nação de Impacto';
             CONFIG.tema = document.getElementById('cfgTema').value;
             CONFIG.temaEmoji = document.getElementById('cfgTemaEmoji').value || '🎨';
@@ -541,11 +551,26 @@
             CONFIG.semanas = semStr.split(',').map(s=>s.trim()).filter(s=>s);
             if(CONFIG.semanas.length===0) CONFIG.semanas=['1ª Semana'];
             
+            // NOVIDADE CRUCIAL: Salva automaticamente os campos de texto de TODAS as tribos que estão na tela
+            // Assim não precisa clicar em "salvar tribo" individualmente se só trocou uma letrinha e quis fechar rápido.
+            CONFIG.tribos.forEach(t => {
+                const elNome = document.getElementById(`cfgNome_${t.id}`);
+                if(elNome) {
+                    t.nome = elNome.value || t.nome;
+                    t.lider = document.getElementById(`cfgLider_${t.id}`).value || '';
+                    t.emoji = document.getElementById(`cfgEmoji_${t.id}`).value || '📌';
+                    t.cor = document.getElementById(`cfgCor_${t.id}`).value || t.cor;
+                }
+            });
+
             salvarDB(); 
-            painelAberto = false; document.getElementById('painelConteudo').classList.remove('aberto'); document.getElementById('iconeToggle').textContent = '▼';
-            renderAbas(); atualizarTela();
+            painelAberto = false; 
+            document.getElementById('painelConteudo').classList.remove('aberto'); 
+            document.getElementById('iconeToggle').textContent = '▼';
+            renderAbas(); 
+            atualizarTela();
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            mostrarToast('Configurações Salvas!');
+            mostrarToast('Todas as Configurações foram Salvas!');
         }
 
         function resetarTudo() {
@@ -558,22 +583,28 @@
         function fmtStr(n) { return n.toLocaleString('pt-BR'); }
         function fmtData(d) { return d.split('-').reverse().join('/'); }
 
+        function setPontos(v, btn) {
+            document.querySelectorAll('.btn-atalho').forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active');
+            const inp = document.getElementById('pontosInput');
+            if (v === 'outro') { inp.style.display = 'block'; inp.focus(); ptsSelecionados = 0; }
+            else { inp.style.display = 'none'; inp.value = ''; ptsSelecionados = v; }
+        }
+
         function adicionarPontos() {
             const triboId = document.getElementById('tribo').value;
             const data = document.getElementById('data').value;
             const sem = document.getElementById('semana').value;
             const pInput = document.getElementById('pontosInput');
             const desc = document.getElementById('descricaoPonto').value || '';
-            const pontos = parseInt(pInput.value) || 0;
+            const pontos = pInput.style.display === 'block' ? (parseInt(pInput.value)||0) : ptsSelecionados;
 
             if(!data || pontos <= 0) return mostrarToast('Insira os pontos na caixa de Pontuação!', '⚠️');
-            if(!triboId || triboId === "") return mostrarToast('Crie/Selecione uma Tribo!', '⚠️');
+            if(!triboId || triboId === "") return mostrarToast('Selecione uma Tribo!', '⚠️');
             
             dados.push({ id: idC++, data, semana: sem, triboId: triboId, pontos, descricao: desc });
             
-            // Limpa o formulário para o próximo lançamento
             document.getElementById('descricaoPonto').value = '';
-            pInput.value = '';
             
             salvarDB(); atualizarTela();
             
@@ -595,12 +626,11 @@
 
         function setSemana(s) { semanaAtiva = s; atualizarTela(); }
 
-        // Mudar o Dropdown de Visão Dinamicamente
         function renderVisaoDropdown() {
             const select = document.getElementById('visaoPlacar');
             const atual = select.value || 'ALL';
             let html = `<option value="ALL">👁️ Visão: Nação (Todas as Tribos)</option>`;
-            CONFIG.tribos.filter(t => !t.oculta).forEach(t => {
+            CONFIG.tribos.filter(t => t.oculta !== true).forEach(t => {
                 html += `<option value="${t.id}">👑 Visão: Tribo ${t.nome}</option>`;
             });
             select.innerHTML = html;
@@ -632,7 +662,6 @@
 
             const visaoAtiva = document.getElementById('visaoPlacar').value;
             
-            // Atualiza Título Baseado na Visão
             if (visaoAtiva === 'ALL') {
                 document.getElementById('tituloPlacar').textContent = semanaAtiva === 'Geral' ? '🏆 Placar Consolidado' : `📊 Placar: ${semanaAtiva}`;
             } else {
@@ -640,12 +669,16 @@
                 document.getElementById('tituloPlacar').textContent = semanaAtiva === 'Geral' ? `🏆 Placar: ${tVisao.nome}` : `📊 ${tVisao.nome}: ${semanaAtiva}`;
             }
 
-            const tribosVisiveis = CONFIG.tribos.filter(t => !t.oculta);
+            // CRUCIAL: Preencher lista de Tribos no Formulário
+            const tribosVisiveis = CONFIG.tribos.filter(t => t.oculta !== true);
+            const selectTribo = document.getElementById('tribo');
+            if (tribosVisiveis.length === 0) {
+                selectTribo.innerHTML = '<option value="">⚠️ Nenhuma Tribo Ativa. Vá no painel.</option>';
+            } else {
+                selectTribo.innerHTML = '<option value="">👉 Toque para Selecionar a Tribo...</option>' + 
+                                        tribosVisiveis.map(t=>`<option value="${t.id}">${t.emoji} ${t.nome}</option>`).join('');
+            }
             
-            // Correção crucial: Se a tribo estiver vazia, instrua a selecionar
-            document.getElementById('tribo').innerHTML = '<option value="" disabled selected>👉 Toque para Selecionar...</option>' + tribosVisiveis.map(t=>`<option value="${t.id}">${t.emoji} ${t.nome}</option>`).join('');
-            
-            // Determina quais tribos renderizar no placar
             const tribosRender = visaoAtiva === 'ALL' ? tribosVisiveis : tribosVisiveis.filter(t => t.id === visaoAtiva);
 
             document.getElementById('totalGrid').innerHTML = tribosRender.map(t => {
