@@ -8,7 +8,6 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        /* ========== CORES OFICIAIS FJU ========== */
         :root {
             --fju-azul-escuro: #002D62;
             --fju-azul-claro: #0055A4;
@@ -29,7 +28,6 @@
             padding-bottom: 40px;
         }
 
-        /* ========== BANNER & HEADER ========== */
         .banner-topo { 
             width: 100%; 
             height: auto; 
@@ -70,7 +68,6 @@
             display: none;
         }
 
-        /* ========== CLASSES UTILITÁRIAS ========== */
         .btn-base { border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: transform 0.2s; font-size: 0.9em; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; }
         .btn-base:active { transform: scale(0.97); }
         .btn-azul { background: var(--fju-azul-claro); color: var(--fju-branco); }
@@ -79,7 +76,6 @@
         .btn-verde { background: #25D366; color: var(--fju-branco); }
         .btn-cinza { background: #555; color: var(--fju-branco); }
 
-        /* ========== PAINEL DE CONTROLE ========== */
         .painel-gerenciamento { background: #E8F0FE; border-radius: 12px; margin: 30px 15px 15px; border: 2px solid var(--fju-azul-claro); overflow: hidden; }
         .painel-header { background: var(--fju-azul-escuro); padding: 15px; display: flex; justify-content: space-between; color: white; font-weight: bold; cursor: pointer; }
         .painel-conteudo { display: none; padding: 15px; }
@@ -98,7 +94,6 @@
         .card-tribo-edit img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--fju-azul-claro); }
         .tribo-edit-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 
-        /* ========== FORMULÁRIO DE LANÇAMENTO ========== */
         .card-lancamento { background: white; border-radius: 15px; padding: 20px; margin: 0 15px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 4px solid var(--fju-azul-claro); }
         .card-lancamento label { display: block; font-weight: 700; color: var(--fju-azul-escuro); margin-bottom: 8px; font-size: 0.95em; }
         .input-group { margin-bottom: 15px; }
@@ -111,7 +106,6 @@
         .btn-atalho { background: #f0f0f0; border: 2px solid #ddd; padding: 12px 5px; border-radius: 8px; font-weight: 700; color: var(--fju-azul-escuro); font-size: 0.9em; transition: all 0.2s; cursor: pointer; }
         .btn-atalho.active { background: var(--fju-azul-claro); color: white; border-color: var(--fju-azul-escuro) !important; transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
 
-        /* ========== ABAS E TOTAIS ========== */
         .tabs-semanas { display: flex; gap: 10px; overflow-x: auto; padding: 5px 15px 15px; scrollbar-width: none; }
         .tabs-semanas::-webkit-scrollbar { display: none; }
         .tab-btn { background: #ddd; border: none; padding: 10px 20px; border-radius: 20px; font-weight: 700; color: #555; white-space: nowrap; transition: 0.3s; }
@@ -139,7 +133,6 @@
 
         .botoes-acoes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
 
-        /* ========== HISTÓRICO ========== */
         .historico-section { margin: 0 15px; }
         .historico-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .historico-header h3 { color: var(--fju-azul-escuro); font-size: 1.2em; }
@@ -162,33 +155,29 @@
     <div class="container">
         <div class="toast" id="toast"><span id="toastMessage">Sucesso!</span></div>
 
-        <!-- BANNER PRINCIPAL (NUNCA MAIS CORTA) -->
         <img id="appBanner" class="banner-topo" src="" alt="Banner da Nação">
 
-        <!-- HEADER DA NAÇÃO -->
         <div class="header" id="appHeader">
             <h1><span id="headerTitulo">Nação de Impacto</span> <span class="highlight">•</span> <span id="headerFJU">FJU</span></h1>
             <div style="font-size:0.9em; opacity:0.9; margin-bottom: 10px;">Controle de Pontuação Semanal</div>
             
-            <!-- Logo Dinâmica -->
             <div id="containerLogoFJU">
                 <img id="appLogoFju" class="img-logo-fju" src="" alt="Logo FJU">
                 <div class="logo-fju" id="appLogoText">FJ<span class="u">U</span> <span id="headerSimbolo">⚡</span></div>
             </div>
         </div>
 
-        <!-- FORMULÁRIO RÁPIDO -->
         <div class="card-lancamento">
             <div style="display:flex; gap:10px;">
                 <div class="input-group" style="flex:1;"><label>📅 Data</label><input type="date" id="data"></div>
                 <div class="input-group" style="flex:1;"><label>🗓️ Semana</label><select id="semana"></select></div>
             </div>
             
-            <!-- SELETOR DE TRIBO COM BOTÕES (SOLUÇÃO DEFINITIVA PARA CELULAR) -->
+            <!-- LISTA DE TRIBOS EM BOTÕES (CORRIGIDO PARA MOBILE) -->
             <div class="input-group">
                 <label>👑 Selecione a Tribo</label>
                 <div id="gridTribosSelect" class="grid-tribos">
-                    <!-- Os botões das tribos vão aparecer aqui automaticamente -->
+                    <!-- Botões gerados via Javascript -->
                 </div>
                 <input type="hidden" id="tribo" value="">
             </div>
@@ -199,30 +188,26 @@
                 
                 <div style="font-size: 0.85em; color: var(--fju-azul-claro); font-weight: bold; margin-bottom: 8px;">Atalhos rápidos para preencher:</div>
                 <div class="grid-atalhos">
-                    <button class="btn-atalho" onclick="document.getElementById('pontosInput').value=100000">100k</button>
-                    <button class="btn-atalho" onclick="document.getElementById('pontosInput').value=50000">50k</button>
-                    <button class="btn-atalho" onclick="document.getElementById('pontosInput').value=10000">10k</button>
-                    <button class="btn-atalho" onclick="document.getElementById('pontosInput').value=5000">5k</button>
-                    <button class="btn-atalho" onclick="document.getElementById('pontosInput').value=1000">1k</button>
-                    <button class="btn-atalho" style="background:#ffcccc; color:var(--fju-vermelho);" onclick="document.getElementById('pontosInput').value=''">Limpar</button>
+                    <button type="button" class="btn-atalho" onclick="document.getElementById('pontosInput').value=100000">100k</button>
+                    <button type="button" class="btn-atalho" onclick="document.getElementById('pontosInput').value=50000">50k</button>
+                    <button type="button" class="btn-atalho" onclick="document.getElementById('pontosInput').value=10000">10k</button>
+                    <button type="button" class="btn-atalho" onclick="document.getElementById('pontosInput').value=5000">5k</button>
+                    <button type="button" class="btn-atalho" onclick="document.getElementById('pontosInput').value=1000">1k</button>
+                    <button type="button" class="btn-atalho" style="background:#ffcccc; color:var(--fju-vermelho);" onclick="document.getElementById('pontosInput').value=''">Limpar</button>
                 </div>
             </div>
 
-            <!-- DESCRIÇÃO -->
             <div class="input-group">
                 <label>📝 Descrição / Motivo</label>
                 <input type="text" id="descricaoPonto" placeholder="Ex: Tarefa relâmpago, Desafio...">
             </div>
             
-            <button class="btn-base btn-azul" style="font-size: 1.1em; padding: 15px;" onclick="adicionarPontos()">➕ Lançar Pontos</button>
+            <button type="button" class="btn-base btn-azul" style="font-size: 1.1em; padding: 15px;" onclick="adicionarPontos()">➕ Lançar Pontos</button>
         </div>
 
-        <!-- SELETOR DE VISÃO (ABAS) -->
         <div class="tabs-semanas" id="tabsSemanas"></div>
 
-        <!-- PLACAR / TOTAIS -->
         <div class="total-section">
-            <!-- Filtro Visão Tribo ou Nação -->
             <select id="visaoPlacar" class="select-visao" onchange="atualizarTela()">
                 <option value="ALL">👁️ Visão: Nação (Todas as Tribos)</option>
             </select>
@@ -235,23 +220,22 @@
                 <div style="text-align: center; margin-bottom: 10px; font-size: 0.8em; opacity: 0.8;">AÇÕES E RELATÓRIOS (MOBILE)</div>
                 
                 <div class="botoes-acoes" style="margin-top: 0;">
-                    <button class="btn-base btn-verde" onclick="copiarTexto()">💬 Resumo Rápido</button>
-                    <button class="btn-base btn-amarelo" onclick="gerarImagem()" id="btnImg">🖼️ Gerar Imagem</button>
+                    <button type="button" class="btn-base btn-verde" onclick="copiarTexto()">💬 Resumo Rápido</button>
+                    <button type="button" class="btn-base btn-amarelo" onclick="gerarImagem()" id="btnImg">🖼️ Gerar Imagem</button>
                 </div>
                 
                 <div class="botoes-acoes">
-                    <button class="btn-base btn-azul" onclick="copiarRelatorioCompleto()">📋 Relatório (Zap)</button>
-                    <button class="btn-base btn-verde" style="background:#217346" onclick="exportarRelatorioCSV()">📊 Baixar Excel</button>
+                    <button type="button" class="btn-base btn-azul" onclick="copiarRelatorioCompleto()">📋 Relatório (Zap)</button>
+                    <button type="button" class="btn-base btn-verde" style="background:#217346" onclick="exportarRelatorioCSV()">📊 Baixar Excel</button>
                 </div>
 
                 <div class="botoes-acoes">
-                    <button class="btn-base btn-cinza" onclick="salvarDadosJSON()">💾 Backup Site</button>
-                    <button class="btn-base btn-vermelho" onclick="resetarTudo()">🗑️ Limpar Tudo</button>
+                    <button type="button" class="btn-base btn-cinza" onclick="salvarDadosJSON()">💾 Backup Site</button>
+                    <button type="button" class="btn-base btn-vermelho" onclick="resetarTudo()">🗑️ Limpar Tudo</button>
                 </div>
             </div>
         </div>
 
-        <!-- HISTÓRICO -->
         <div class="historico-section">
             <div class="historico-header">
                 <h3>📋 Últimos Lançamentos</h3>
@@ -260,7 +244,6 @@
             <div class="lista-tribos" id="listaTribos"></div>
         </div>
 
-        <!-- PAINEL DE CONTROLE NO RODAPÉ -->
         <div class="painel-gerenciamento">
             <div class="painel-header" onclick="togglePainel()">
                 <span>⚙️ Configurações (Liderança)</span>
@@ -270,7 +253,7 @@
                 
                 <div class="painel-login" id="painelLogin">
                     <input type="password" id="senhaPainel" placeholder="Senha..." onkeydown="if(event.key==='Enter') verificarSenha()">
-                    <button class="btn-base btn-azul" style="width:auto;" onclick="verificarSenha()">🔓 Entrar</button>
+                    <button type="button" class="btn-base btn-azul" style="width:auto;" onclick="verificarSenha()">🔓 Entrar</button>
                 </div>
 
                 <div id="areaConfiguracoes" style="display: none;">
@@ -314,7 +297,7 @@
                         <div class="config-item"><label>Data Início:</label><input type="date" id="cfgInicio"></div>
                         <div class="config-item"><label>Data Fim:</label><input type="date" id="cfgFim"></div>
                     </div>
-                    <button class="btn-base btn-azul" onclick="salvarConfiguracoes()">💾 Fechar Configurações</button>
+                    <button type="button" class="btn-base btn-azul" onclick="salvarConfiguracoes()">💾 Fechar Configurações</button>
                 </div>
             </div>
         </div>
@@ -322,7 +305,7 @@
     </div>
 
     <script>
-        // Configuração Padrão Inicial
+        // Configuração Padrão Inicial Protegida
         let CONFIG = {
             tribos: [
                 { id: 't1', nome: 'Judá', lider: '', emoji: '🦁', cor: '#FFD100', oculta: false },
@@ -337,7 +320,7 @@
         let arteUrl = '', bannerMainUrl = '', logoFjuUrl = '';
         let fotosTribos = {};
 
-        // Init e LocalStorage
+        // Inicia o sistema com trava contra falhas do celular
         function init() {
             try {
                 const slv = JSON.parse(localStorage.getItem('fjuDataV3'));
@@ -351,15 +334,20 @@
                         CONFIG.dataFim = slv.CONFIG.dataFim || CONFIG.dataFim;
                         CONFIG.semanas = slv.CONFIG.semanas || CONFIG.semanas;
                         CONFIG.simboloFJU = slv.CONFIG.simboloFJU || CONFIG.simboloFJU;
-                        if (slv.CONFIG.tribos) CONFIG.tribos = slv.CONFIG.tribos;
+                        if (slv.CONFIG.tribos && slv.CONFIG.tribos.length > 0) {
+                            CONFIG.tribos = slv.CONFIG.tribos;
+                        }
                     }
                     fotosTribos = slv.fotosTribos || {};
                     arteUrl = slv.arteUrl || '';
                     bannerMainUrl = slv.bannerMainUrl || '';
                     logoFjuUrl = slv.logoFjuUrl || '';
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.error("Modo visualizador bloqueou memória local.");
+            }
             
+            // Garantia extra para o caso da lista corromper
             if (!CONFIG.tribos || CONFIG.tribos.length === 0) {
                 CONFIG.tribos = [{ id: 't1', nome: 'Judá', lider: '', emoji: '🦁', cor: '#FFD100', oculta: false }];
             }
@@ -374,7 +362,7 @@
 
         function salvarDB() {
             try { localStorage.setItem('fjuDataV3', JSON.stringify({dados, idC, CONFIG, fotosTribos, arteUrl, bannerMainUrl, logoFjuUrl})); } 
-            catch(e) { mostrarToast('⚠️ Imagem pesada! Tente não colocar fotos gigantes.', '⚠️'); }
+            catch(e) { console.error('Erro ao salvar', e); }
         }
 
         function mostrarToast(msg, em='✅') {
@@ -382,7 +370,6 @@
             t.classList.add('ativo'); setTimeout(() => t.classList.remove('ativo'), 3000);
         }
 
-        // ================= COMPARTILHAMENTO INTELIGENTE =================
         async function compartilharViaCelular(texto) {
             if (navigator.share) {
                 try {
@@ -411,7 +398,6 @@
             document.body.appendChild(modal);
         }
 
-        // ================= PAINEL DE LIDERANÇA =================
         let painelAberto = false, painelDesbloqueado = false;
         
         function togglePainel() {
@@ -461,21 +447,21 @@
                     </div>
                     <input type="text" id="cfgLider_${t.id}" value="${t.lider||''}" placeholder="Nome do Cabeça da Tribo" style="width:100%; padding:8px; margin-bottom:5px;">
                     
-                    <button class="btn-base btn-amarelo" style="padding:6px; font-size:0.8em; margin-bottom:5px;" onclick="salvarTribo('${t.id}')">💾 Salvar Alteração de Tribo individual</button>
+                    <button type="button" class="btn-base btn-amarelo" style="padding:6px; font-size:0.8em; margin-bottom:5px;" onclick="salvarTribo('${t.id}')">💾 Salvar Alteração</button>
                     
                     <div style="display:flex; gap:5px;">
-                        <button class="btn-base" style="background:${bgOcultar}; color:white; padding:6px; font-size:0.8em; flex:1;" onclick="toggleOcultarTribo('${t.id}')">${btnOcultarText}</button>
-                        <button class="btn-base btn-vermelho" style="padding:6px; font-size:0.8em; flex:1;" onclick="excluirTribo('${t.id}')">🗑️ Excluir</button>
+                        <button type="button" class="btn-base" style="background:${bgOcultar}; color:white; padding:6px; font-size:0.8em; flex:1;" onclick="toggleOcultarTribo('${t.id}')">${btnOcultarText}</button>
+                        <button type="button" class="btn-base btn-vermelho" style="padding:6px; font-size:0.8em; flex:1;" onclick="excluirTribo('${t.id}')">🗑️ Excluir</button>
                     </div>
                 </div>
                 `;
             }).join('');
 
-            tribosHtml += `<button class="btn-base btn-verde" style="margin-top:10px;" onclick="adicionarNovaTribo()">➕ Adicionar Nova Tribo</button>`;
+            tribosHtml += `<button type="button" class="btn-base btn-verde" style="margin-top:10px;" onclick="adicionarNovaTribo()">➕ Adicionar Nova Tribo</button>`;
             document.getElementById('cfgTribosList').innerHTML = tribosHtml;
         }
 
-        function salvarTribo(id) {
+        window.salvarTribo = function(id) {
             const t = CONFIG.tribos.find(x => x.id === id);
             if(t) {
                 t.nome = document.getElementById(`cfgNome_${id}`).value || t.nome;
@@ -483,21 +469,21 @@
                 t.emoji = document.getElementById(`cfgEmoji_${id}`).value || '📌';
                 t.cor = document.getElementById(`cfgCor_${id}`).value || t.cor;
                 salvarDB(); atualizarTela(); renderConfigPainel();
-                mostrarToast('Tribo salva com sucesso!');
+                mostrarToast('Tribo salva!');
             }
         }
 
-        function toggleOcultarTribo(id) {
+        window.toggleOcultarTribo = function(id) {
             const t = CONFIG.tribos.find(x => x.id === id);
             if(t) {
                 t.oculta = !t.oculta;
                 salvarDB(); renderConfigPainel(); atualizarTela();
-                mostrarToast(t.oculta ? 'Tribo Ocultada do Placar!' : 'Tribo Visível!');
+                mostrarToast(t.oculta ? 'Tribo Ocultada!' : 'Tribo Visível!');
             }
         }
 
-        function excluirTribo(id) {
-            if(confirm('Tem certeza que deseja EXCLUIR permanentemente esta tribo? A tribo sumirá de todos os relatórios.')) {
+        window.excluirTribo = function(id) {
+            if(confirm('Tem certeza que deseja EXCLUIR permanentemente esta tribo?')) {
                 CONFIG.tribos = CONFIG.tribos.filter(x => x.id !== id);
                 delete fotosTribos[id];
                 salvarDB(); renderConfigPainel(); atualizarTela();
@@ -505,39 +491,39 @@
             }
         }
 
-        function adicionarNovaTribo() {
+        window.adicionarNovaTribo = function() {
             const novoId = 't' + Date.now();
             CONFIG.tribos.push({ id: novoId, nome: 'Nova Tribo', lider: '', emoji: '🏳️', cor: '#888888', oculta: false });
             salvarDB(); renderConfigPainel(); atualizarTela();
-            mostrarToast('Nova tribo adicionada na lista!', '➕');
+            mostrarToast('Nova tribo adicionada!', '➕');
             setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }, 100);
         }
 
         function uploadFotoTribo(id, input) {
             const file = input.files[0]; if(!file) return;
             const reader = new FileReader();
-            reader.onload = e => { fotosTribos[id] = e.target.result; salvarDB(); renderConfigPainel(); atualizarTela(); mostrarToast('Foto da tribo carregada!'); };
+            reader.onload = e => { fotosTribos[id] = e.target.result; salvarDB(); renderConfigPainel(); atualizarTela(); mostrarToast('Foto carregada!'); };
             reader.readAsDataURL(file);
         }
 
         function uploadLogoFju(input) {
             const file = input.files[0]; if(!file) return;
             const reader = new FileReader();
-            reader.onload = e => { logoFjuUrl = e.target.result; salvarDB(); atualizarTela(); mostrarToast('Logo Oficial salva!'); };
+            reader.onload = e => { logoFjuUrl = e.target.result; salvarDB(); atualizarTela(); mostrarToast('Logo salva!'); };
             reader.readAsDataURL(file);
         }
 
         function uploadBannerPrincipal(input) {
             const file = input.files[0]; if(!file) return;
             const reader = new FileReader();
-            reader.onload = e => { bannerMainUrl = e.target.result; salvarDB(); atualizarTela(); mostrarToast('Banner Principal salvo!'); };
+            reader.onload = e => { bannerMainUrl = e.target.result; salvarDB(); atualizarTela(); mostrarToast('Banner salvo!'); };
             reader.readAsDataURL(file);
         }
 
         function uploadArteTema(input) {
             const file = input.files[0]; if(!file) return;
             const reader = new FileReader();
-            reader.onload = e => { arteUrl = e.target.result; salvarDB(); mostrarToast('Fundo WhatsApp salvo!'); };
+            reader.onload = e => { arteUrl = e.target.result; salvarDB(); mostrarToast('Fundo salvo!'); };
             reader.readAsDataURL(file);
         }
 
@@ -568,7 +554,7 @@
             renderAbas(); 
             atualizarTela();
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            mostrarToast('Todas as Configurações foram Salvas!');
+            mostrarToast('Configurações Salvas!');
         }
 
         function resetarTudo() {
@@ -577,12 +563,10 @@
             }
         }
 
-        // ================= FUNÇÕES DE UX =================
         function fmtStr(n) { return n.toLocaleString('pt-BR'); }
         function fmtData(d) { return d.split('-').reverse().join('/'); }
 
-        // NOVA FUNÇÃO: Botões de Tribo
-        function selecionarTribo(id, btn) {
+        window.selecionarTribo = function(id, btn) {
             document.getElementById('tribo').value = id;
             const botoes = document.getElementById('gridTribosSelect').querySelectorAll('.btn-atalho');
             botoes.forEach(b => b.classList.remove('active'));
@@ -604,7 +588,10 @@
             
             document.getElementById('descricaoPonto').value = '';
             pInput.value = '';
-            document.getElementById('tribo').value = ''; // Limpa a seleção da tribo
+            document.getElementById('tribo').value = '';
+            
+            const botoes = document.getElementById('gridTribosSelect').querySelectorAll('.btn-atalho');
+            botoes.forEach(b => b.classList.remove('active'));
             
             salvarDB(); atualizarTela();
             
@@ -612,19 +599,19 @@
             mostrarToast(`${fmtStr(pontos)} pts para ${t.nome}!`);
         }
 
-        function removerPonto(id) {
+        window.removerPonto = function(id) {
             if(confirm('Excluir este lançamento?')) { dados = dados.filter(d=>d.id !== id); salvarDB(); atualizarTela(); }
         }
 
         function renderAbas() {
             document.getElementById('semana').innerHTML = CONFIG.semanas.map(s=>`<option value="${s}">${s}</option>`).join('');
             
-            let html = `<button class="tab-btn ${semanaAtiva==='Geral'?'active':''}" onclick="setSemana('Geral')">Consolidado Geral</button>`;
-            CONFIG.semanas.forEach(s => { html += `<button class="tab-btn ${semanaAtiva===s?'active':''}" onclick="setSemana('${s}')">${s}</button>`; });
+            let html = `<button type="button" class="tab-btn ${semanaAtiva==='Geral'?'active':''}" onclick="setSemana('Geral')">Consolidado Geral</button>`;
+            CONFIG.semanas.forEach(s => { html += `<button type="button" class="tab-btn ${semanaAtiva===s?'active':''}" onclick="setSemana('${s}')">${s}</button>`; });
             document.getElementById('tabsSemanas').innerHTML = html;
         }
 
-        function setSemana(s) { semanaAtiva = s; atualizarTela(); }
+        window.setSemana = function(s) { semanaAtiva = s; atualizarTela(); }
 
         function renderVisaoDropdown() {
             const select = document.getElementById('visaoPlacar');
@@ -637,7 +624,7 @@
             select.value = atual;
         }
 
-        function atualizarTela() {
+        window.atualizarTela = function() {
             renderVisaoDropdown();
             
             document.getElementById('headerTitulo').textContent = CONFIG.tituloNacao;
@@ -669,17 +656,17 @@
                 document.getElementById('tituloPlacar').textContent = semanaAtiva === 'Geral' ? `🏆 Placar: ${tVisao.nome}` : `📊 ${tVisao.nome}: ${semanaAtiva}`;
             }
 
-            // CARREGA OS BOTÕES DAS TRIBOS NO FORMULÁRIO (Substituindo o select antigo)
+            // GERA OS BOTÕES DAS TRIBOS DINAMICAMENTE
             const tribosVisiveis = CONFIG.tribos.filter(t => t.oculta !== true);
             const gridTribos = document.getElementById('gridTribosSelect');
             const triboSelecionada = document.getElementById('tribo').value;
             
             if (tribosVisiveis.length === 0) {
-                gridTribos.innerHTML = '<div style="color:red; font-weight:bold; grid-column: 1 / -1;">⚠️ Crie ou mostre as tribos no painel abaixo.</div>';
+                gridTribos.innerHTML = '<div style="color:red; font-weight:bold; grid-column: 1 / -1;">⚠️ Nenhuma Tribo Ativa. Vá no painel abaixo.</div>';
             } else {
                 gridTribos.innerHTML = tribosVisiveis.map(t => {
                     const isActive = t.id === triboSelecionada ? 'active' : '';
-                    return `<button class="btn-atalho ${isActive}" style="border: 2px solid ${t.cor}; padding: 12px 5px; font-size: 1.05em;" onclick="selecionarTribo('${t.id}', this)">${t.emoji} ${t.nome}</button>`;
+                    return `<button type="button" class="btn-atalho ${isActive}" style="border: 2px solid ${t.cor}; padding: 12px 5px; font-size: 1.05em;" onclick="selecionarTribo('${t.id}', this)">${t.emoji} ${t.nome}</button>`;
                 }).join('');
             }
             
@@ -732,7 +719,7 @@
                         <div class="detalhe"><span class="badge-semana">${d.semana}</span> ${fmtData(d.data)}</div>
                         ${descHtml}
                     </div>
-                    <div class="acoes"><div class="pontos">+${fmtStr(d.pontos)}</div><button class="btn-mini" onclick="removerPonto(${d.id})">Apagar</button></div>
+                    <div class="acoes"><div class="pontos">+${fmtStr(d.pontos)}</div><button type="button" class="btn-mini" onclick="removerPonto(${d.id})">Apagar</button></div>
                 </div>`;
             }).join('');
         }
@@ -834,7 +821,7 @@
             const a = document.createElement('a'); a.href=url; a.download=`backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); mostrarToast('Backup Salvo!','💾');
         }
 
-        // Gerar Imagem Forçada para Mobile (600px)
+        // Gerar Imagem
         function gerarImagem() {
             if(dados.length === 0) return mostrarToast('Sem dados para gerar imagem!', '⚠️');
             const btn = document.getElementById('btnImg'); btn.textContent = '⏳ ...';
