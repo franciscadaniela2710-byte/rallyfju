@@ -173,11 +173,11 @@
                 <div class="input-group" style="flex:1;"><label>🗓️ Semana</label><select id="semana"></select></div>
             </div>
             
-            <!-- LISTA DE TRIBOS EM BOTÕES (CORRIGIDO PARA MOBILE) -->
+            <!-- AQUI ESTÁ A GRANDE MUDANÇA: BOTÕES DE TRIBO -->
             <div class="input-group">
-                <label>👑 Selecione a Tribo</label>
+                <label>👑 Toque na Tribo Abaixo:</label>
                 <div id="gridTribosSelect" class="grid-tribos">
-                    <!-- Botões gerados via Javascript -->
+                    <!-- Os botões gerados vão aparecer aqui -->
                 </div>
                 <input type="hidden" id="tribo" value="">
             </div>
@@ -305,7 +305,7 @@
     </div>
 
     <script>
-        // Configuração Padrão Inicial Protegida
+        // Configuração Padrão Inicial
         let CONFIG = {
             tribos: [
                 { id: 't1', nome: 'Judá', lider: '', emoji: '🦁', cor: '#FFD100', oculta: false },
@@ -320,7 +320,7 @@
         let arteUrl = '', bannerMainUrl = '', logoFjuUrl = '';
         let fotosTribos = {};
 
-        // Inicia o sistema com trava contra falhas do celular
+        // INICIALIZAÇÃO BLINDADA
         function init() {
             try {
                 const slv = JSON.parse(localStorage.getItem('fjuDataV3'));
@@ -344,14 +344,16 @@
                     logoFjuUrl = slv.logoFjuUrl || '';
                 }
             } catch (e) {
-                console.error("Modo visualizador bloqueou memória local.");
+                console.error("Erro no carregamento.", e);
             }
             
-            // Garantia extra para o caso da lista corromper
+            // Tratamento contra dados corrompidos
             if (!CONFIG.tribos || CONFIG.tribos.length === 0) {
                 CONFIG.tribos = [{ id: 't1', nome: 'Judá', lider: '', emoji: '🦁', cor: '#FFD100', oculta: false }];
             }
 
+            // Garante que array seja válido
+            CONFIG.tribos = CONFIG.tribos.filter(t => t && t.id);
             CONFIG.tribos.forEach(t => { if(t.oculta === undefined) t.oculta = false; });
             dados.forEach(d => { if(d.descricao === undefined) d.descricao = ''; });
 
@@ -362,7 +364,7 @@
 
         function salvarDB() {
             try { localStorage.setItem('fjuDataV3', JSON.stringify({dados, idC, CONFIG, fotosTribos, arteUrl, bannerMainUrl, logoFjuUrl})); } 
-            catch(e) { console.error('Erro ao salvar', e); }
+            catch(e) { mostrarToast('⚠️ Imagem pesada! Tente não colocar fotos gigantes.', '⚠️'); }
         }
 
         function mostrarToast(msg, em='✅') {
@@ -400,14 +402,14 @@
 
         let painelAberto = false, painelDesbloqueado = false;
         
-        function togglePainel() {
+        window.togglePainel = function() {
             painelAberto = !painelAberto;
             document.getElementById('painelConteudo').classList.toggle('aberto', painelAberto);
             document.getElementById('iconeToggle').textContent = painelAberto ? '▲' : '▼';
             if(painelAberto) setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }, 100);
         }
 
-        function verificarSenha() {
+        window.verificarSenha = function() {
             if (document.getElementById('senhaPainel').value === 'fju2026') {
                 painelDesbloqueado = true;
                 document.getElementById('painelLogin').style.display = 'none';
@@ -469,7 +471,7 @@
                 t.emoji = document.getElementById(`cfgEmoji_${id}`).value || '📌';
                 t.cor = document.getElementById(`cfgCor_${id}`).value || t.cor;
                 salvarDB(); atualizarTela(); renderConfigPainel();
-                mostrarToast('Tribo salva!');
+                mostrarToast('Tribo salva com sucesso!');
             }
         }
 
@@ -483,7 +485,7 @@
         }
 
         window.excluirTribo = function(id) {
-            if(confirm('Tem certeza que deseja EXCLUIR permanentemente esta tribo?')) {
+            if(confirm('Tem certeza que deseja EXCLUIR permanentemente esta tribo? A tribo sumirá de todos os relatórios.')) {
                 CONFIG.tribos = CONFIG.tribos.filter(x => x.id !== id);
                 delete fotosTribos[id];
                 salvarDB(); renderConfigPainel(); atualizarTela();
@@ -499,35 +501,35 @@
             setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }, 100);
         }
 
-        function uploadFotoTribo(id, input) {
+        window.uploadFotoTribo = function(id, input) {
             const file = input.files[0]; if(!file) return;
             const reader = new FileReader();
             reader.onload = e => { fotosTribos[id] = e.target.result; salvarDB(); renderConfigPainel(); atualizarTela(); mostrarToast('Foto carregada!'); };
             reader.readAsDataURL(file);
         }
 
-        function uploadLogoFju(input) {
+        window.uploadLogoFju = function(input) {
             const file = input.files[0]; if(!file) return;
             const reader = new FileReader();
-            reader.onload = e => { logoFjuUrl = e.target.result; salvarDB(); atualizarTela(); mostrarToast('Logo salva!'); };
+            reader.onload = e => { logoFjuUrl = e.target.result; salvarDB(); atualizarTela(); mostrarToast('Logo Oficial salva!'); };
             reader.readAsDataURL(file);
         }
 
-        function uploadBannerPrincipal(input) {
+        window.uploadBannerPrincipal = function(input) {
             const file = input.files[0]; if(!file) return;
             const reader = new FileReader();
-            reader.onload = e => { bannerMainUrl = e.target.result; salvarDB(); atualizarTela(); mostrarToast('Banner salvo!'); };
+            reader.onload = e => { bannerMainUrl = e.target.result; salvarDB(); atualizarTela(); mostrarToast('Banner Principal salvo!'); };
             reader.readAsDataURL(file);
         }
 
-        function uploadArteTema(input) {
+        window.uploadArteTema = function(input) {
             const file = input.files[0]; if(!file) return;
             const reader = new FileReader();
-            reader.onload = e => { arteUrl = e.target.result; salvarDB(); mostrarToast('Fundo salvo!'); };
+            reader.onload = e => { arteUrl = e.target.result; salvarDB(); mostrarToast('Fundo WhatsApp salvo!'); };
             reader.readAsDataURL(file);
         }
 
-        function salvarConfiguracoes() {
+        window.salvarConfiguracoes = function() {
             CONFIG.tituloNacao = document.getElementById('cfgNacao').value || 'Nação de Impacto';
             CONFIG.tema = document.getElementById('cfgTema').value;
             CONFIG.temaEmoji = document.getElementById('cfgTemaEmoji').value || '🎨';
@@ -557,7 +559,7 @@
             mostrarToast('Configurações Salvas!');
         }
 
-        function resetarTudo() {
+        window.resetarTudo = function() {
             if(confirm('Zerar toda a pontuação e histórico? (Isso não apaga fotos ou nomes configurados)')) { 
                 dados = []; salvarDB(); atualizarTela(); mostrarToast('Placar Zerado!'); 
             }
@@ -573,7 +575,7 @@
             btn.classList.add('active');
         }
 
-        function adicionarPontos() {
+        window.adicionarPontos = function() {
             const triboId = document.getElementById('tribo').value;
             const data = document.getElementById('data').value;
             const sem = document.getElementById('semana').value;
@@ -582,13 +584,13 @@
             const pontos = parseInt(pInput.value) || 0;
 
             if(!data || pontos <= 0) return mostrarToast('Insira os pontos na caixa de Pontuação!', '⚠️');
-            if(!triboId || triboId === "") return mostrarToast('Toque no botão de uma Tribo para selecionar!', '⚠️');
+            if(!triboId || triboId === "") return mostrarToast('Toque no botão de uma Tribo acima!', '⚠️');
             
             dados.push({ id: idC++, data, semana: sem, triboId: triboId, pontos, descricao: desc });
             
             document.getElementById('descricaoPonto').value = '';
             pInput.value = '';
-            document.getElementById('tribo').value = '';
+            document.getElementById('tribo').value = ''; 
             
             const botoes = document.getElementById('gridTribosSelect').querySelectorAll('.btn-atalho');
             botoes.forEach(b => b.classList.remove('active'));
@@ -625,107 +627,114 @@
         }
 
         window.atualizarTela = function() {
-            renderVisaoDropdown();
-            
-            document.getElementById('headerTitulo').textContent = CONFIG.tituloNacao;
-            
-            if (logoFjuUrl) {
-                document.getElementById('appLogoFju').src = logoFjuUrl;
-                document.getElementById('appLogoFju').style.display = 'inline-block';
-                document.getElementById('appLogoText').style.display = 'none';
-            } else {
-                document.getElementById('appLogoFju').style.display = 'none';
-                document.getElementById('appLogoText').style.display = 'inline-block';
-            }
+            try {
+                renderVisaoDropdown();
+                
+                document.getElementById('headerTitulo').textContent = CONFIG.tituloNacao;
+                
+                if (logoFjuUrl) {
+                    document.getElementById('appLogoFju').src = logoFjuUrl;
+                    document.getElementById('appLogoFju').style.display = 'inline-block';
+                    document.getElementById('appLogoText').style.display = 'none';
+                } else {
+                    document.getElementById('appLogoFju').style.display = 'none';
+                    document.getElementById('appLogoText').style.display = 'inline-block';
+                }
 
-            if (bannerMainUrl) {
-                document.getElementById('appBanner').src = bannerMainUrl;
-                document.getElementById('appBanner').style.display = 'block';
-                document.getElementById('appHeader').style.display = 'none';
-            } else {
-                document.getElementById('appBanner').style.display = 'none';
-                document.getElementById('appHeader').style.display = 'block';
-            }
+                if (bannerMainUrl) {
+                    document.getElementById('appBanner').src = bannerMainUrl;
+                    document.getElementById('appBanner').style.display = 'block';
+                    document.getElementById('appHeader').style.display = 'none';
+                } else {
+                    document.getElementById('appBanner').style.display = 'none';
+                    document.getElementById('appHeader').style.display = 'block';
+                }
 
-            const visaoAtiva = document.getElementById('visaoPlacar').value;
-            
-            if (visaoAtiva === 'ALL') {
-                document.getElementById('tituloPlacar').textContent = semanaAtiva === 'Geral' ? '🏆 Placar Consolidado' : `📊 Placar: ${semanaAtiva}`;
-            } else {
-                const tVisao = CONFIG.tribos.find(t => t.id === visaoAtiva);
-                document.getElementById('tituloPlacar').textContent = semanaAtiva === 'Geral' ? `🏆 Placar: ${tVisao.nome}` : `📊 ${tVisao.nome}: ${semanaAtiva}`;
-            }
+                const visaoAtiva = document.getElementById('visaoPlacar').value || 'ALL';
+                let tVisao = null;
+                
+                if (visaoAtiva !== 'ALL') {
+                    tVisao = CONFIG.tribos.find(t => t.id === visaoAtiva);
+                }
 
-            // GERA OS BOTÕES DAS TRIBOS DINAMICAMENTE
-            const tribosVisiveis = CONFIG.tribos.filter(t => t.oculta !== true);
-            const gridTribos = document.getElementById('gridTribosSelect');
-            const triboSelecionada = document.getElementById('tribo').value;
-            
-            if (tribosVisiveis.length === 0) {
-                gridTribos.innerHTML = '<div style="color:red; font-weight:bold; grid-column: 1 / -1;">⚠️ Nenhuma Tribo Ativa. Vá no painel abaixo.</div>';
-            } else {
-                gridTribos.innerHTML = tribosVisiveis.map(t => {
-                    const isActive = t.id === triboSelecionada ? 'active' : '';
-                    return `<button type="button" class="btn-atalho ${isActive}" style="border: 2px solid ${t.cor}; padding: 12px 5px; font-size: 1.05em;" onclick="selecionarTribo('${t.id}', this)">${t.emoji} ${t.nome}</button>`;
+                if (visaoAtiva === 'ALL' || !tVisao) {
+                    document.getElementById('tituloPlacar').textContent = semanaAtiva === 'Geral' ? '🏆 Placar Consolidado' : `📊 Placar: ${semanaAtiva}`;
+                } else {
+                    document.getElementById('tituloPlacar').textContent = semanaAtiva === 'Geral' ? `🏆 Placar: ${tVisao.nome}` : `📊 ${tVisao.nome}: ${semanaAtiva}`;
+                }
+
+                // GERA BOTÕES DE TRIBOS FIXOS
+                const tribosVisiveis = CONFIG.tribos.filter(t => t.oculta !== true);
+                const gridTribos = document.getElementById('gridTribosSelect');
+                const triboSelecionada = document.getElementById('tribo').value;
+                
+                if (tribosVisiveis.length === 0) {
+                    gridTribos.innerHTML = '<div style="color:red; font-weight:bold; grid-column: 1 / -1;">⚠️ Nenhuma Tribo Ativa. Vá no painel abaixo.</div>';
+                } else {
+                    gridTribos.innerHTML = tribosVisiveis.map(t => {
+                        const isActive = t.id === triboSelecionada ? 'active' : '';
+                        return `<button type="button" class="btn-atalho ${isActive}" style="border: 2px solid ${t.cor}; padding: 12px 5px; font-size: 1.05em;" onclick="selecionarTribo('${t.id}', this)">${t.emoji} ${t.nome}</button>`;
+                    }).join('');
+                }
+                
+                const tribosRender = visaoAtiva === 'ALL' || !tVisao ? tribosVisiveis : [tVisao];
+
+                document.getElementById('totalGrid').innerHTML = tribosRender.map(t => {
+                    const tGeral = dados.filter(d=>d.triboId===t.id).reduce((s,d)=>s+d.pontos,0);
+                    const tSemana = dados.filter(d=>d.triboId===t.id && d.semana===semanaAtiva).reduce((s,d)=>s+d.pontos,0);
+                    
+                    let ptsHtml = `<div class="pts-destaque">${fmtStr(tGeral)}</div>`;
+                    if(semanaAtiva !== 'Geral') ptsHtml = `<div class="pts-destaque" style="color:white;">${fmtStr(tSemana)}</div><div class="pts-sub">Geral: ${fmtStr(tGeral)}</div>`;
+
+                    const foto = fotosTribos[t.id];
+                    const imgHtml = foto 
+                        ? `<div class="img-wrapper" style="border:2px solid ${t.cor}"><img src="${foto}"></div>`
+                        : `<div class="img-wrapper" style="background:${t.cor}; color:${t.cor==='#FFD100'?'#000':'#FFF'}">${t.emoji}</div>`;
+                    
+                    return `<div class="total-item" style="border-left-color:${t.cor}">
+                        <div style="display:flex; gap:12px; align-items:center;">
+                            ${imgHtml}
+                            <div><div class="nome-tribo">${t.nome}</div>${t.lider ? `<div class="lider-tribo">👤 ${t.lider}</div>` : ''}</div>
+                        </div>
+                        <div class="pontos-tribo">${ptsHtml}</div>
+                    </div>`;
                 }).join('');
+
+                const idsRender = tribosRender.map(t => t.id);
+                const somaG = dados.filter(d => idsRender.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0);
+                const somaS = semanaAtiva !== 'Geral' ? dados.filter(d=>d.semana===semanaAtiva && idsRender.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0) : 0;
+                
+                let labelGeral = visaoAtiva === 'ALL' || !tVisao ? '🏆 Total Geral' : '🏆 Total da Tribo';
+
+                if(semanaAtiva === 'Geral') document.getElementById('totalGeral').innerHTML = `<div class="label">${labelGeral}</div><div class="valor">${fmtStr(somaG)}</div>`;
+                else document.getElementById('totalGeral').innerHTML = `<div class="label">Total na ${semanaAtiva}</div><div class="valor" style="color:white; font-size:2.4em;">${fmtStr(somaS)}</div><div class="label" style="font-size:0.8em; margin-top:5px;">Acumulado: <span style="color:var(--fju-amarelo)">${fmtStr(somaG)}</span></div>`;
+
+                const histData = semanaAtiva === 'Geral' ? dados : dados.filter(d=>d.semana===semanaAtiva);
+                const histRender = visaoAtiva === 'ALL' || !tVisao ? histData : histData.filter(d => d.triboId === visaoAtiva);
+                
+                document.getElementById('qtdHistorico').textContent = histRender.length;
+                document.getElementById('listaTribos').innerHTML = [...histRender].reverse().slice(0, 50).map(d => {
+                    const t = CONFIG.tribos.find(x=>x.id===d.triboId);
+                    const nomeDisplay = t ? t.nome : 'Tribo Excluída';
+                    const emojiDisplay = t ? t.emoji : '🗑️';
+                    const colorDisplay = t ? t.cor : '#cccccc';
+                    const descHtml = d.descricao ? `<div style="font-weight:bold; color:var(--fju-azul-claro); margin-top:2px;">📝 ${d.descricao}</div>` : '';
+
+                    return `<div class="tribo-card" style="border-left-color:${colorDisplay}">
+                        <div class="info">
+                            <div class="nome">${emojiDisplay} ${nomeDisplay}</div>
+                            <div class="detalhe"><span class="badge-semana">${d.semana}</span> ${fmtData(d.data)}</div>
+                            ${descHtml}
+                        </div>
+                        <div class="acoes"><div class="pontos">+${fmtStr(d.pontos)}</div><button type="button" class="btn-mini" onclick="removerPonto(${d.id})">Apagar</button></div>
+                    </div>`;
+                }).join('');
+            } catch (err) {
+                console.error("Erro em atualizarTela", err);
             }
-            
-            const tribosRender = visaoAtiva === 'ALL' ? tribosVisiveis : tribosVisiveis.filter(t => t.id === visaoAtiva);
-
-            document.getElementById('totalGrid').innerHTML = tribosRender.map(t => {
-                const tGeral = dados.filter(d=>d.triboId===t.id).reduce((s,d)=>s+d.pontos,0);
-                const tSemana = dados.filter(d=>d.triboId===t.id && d.semana===semanaAtiva).reduce((s,d)=>s+d.pontos,0);
-                
-                let ptsHtml = `<div class="pts-destaque">${fmtStr(tGeral)}</div>`;
-                if(semanaAtiva !== 'Geral') ptsHtml = `<div class="pts-destaque" style="color:white;">${fmtStr(tSemana)}</div><div class="pts-sub">Geral: ${fmtStr(tGeral)}</div>`;
-
-                const foto = fotosTribos[t.id];
-                const imgHtml = foto 
-                    ? `<div class="img-wrapper" style="border:2px solid ${t.cor}"><img src="${foto}"></div>`
-                    : `<div class="img-wrapper" style="background:${t.cor}; color:${t.cor==='#FFD100'?'#000':'#FFF'}">${t.emoji}</div>`;
-                
-                return `<div class="total-item" style="border-left-color:${t.cor}">
-                    <div style="display:flex; gap:12px; align-items:center;">
-                        ${imgHtml}
-                        <div><div class="nome-tribo">${t.nome}</div>${t.lider ? `<div class="lider-tribo">👤 ${t.lider}</div>` : ''}</div>
-                    </div>
-                    <div class="pontos-tribo">${ptsHtml}</div>
-                </div>`;
-            }).join('');
-
-            const idsRender = tribosRender.map(t => t.id);
-            const somaG = dados.filter(d => idsRender.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0);
-            const somaS = semanaAtiva !== 'Geral' ? dados.filter(d=>d.semana===semanaAtiva && idsRender.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0) : 0;
-            
-            let labelGeral = visaoAtiva === 'ALL' ? '🏆 Total Geral Arrecadado' : '🏆 Total da Tribo';
-
-            if(semanaAtiva === 'Geral') document.getElementById('totalGeral').innerHTML = `<div class="label">${labelGeral}</div><div class="valor">${fmtStr(somaG)}</div>`;
-            else document.getElementById('totalGeral').innerHTML = `<div class="label">Total na ${semanaAtiva}</div><div class="valor" style="color:white; font-size:2.4em;">${fmtStr(somaS)}</div><div class="label" style="font-size:0.8em; margin-top:5px;">Acumulado: <span style="color:var(--fju-amarelo)">${fmtStr(somaG)}</span></div>`;
-
-            const histData = semanaAtiva === 'Geral' ? dados : dados.filter(d=>d.semana===semanaAtiva);
-            const histRender = visaoAtiva === 'ALL' ? histData : histData.filter(d => d.triboId === visaoAtiva);
-            
-            document.getElementById('qtdHistorico').textContent = histRender.length;
-            document.getElementById('listaTribos').innerHTML = [...histRender].reverse().slice(0, 50).map(d => {
-                const t = CONFIG.tribos.find(x=>x.id===d.triboId);
-                const nomeDisplay = t ? t.nome : 'Tribo Excluída';
-                const emojiDisplay = t ? t.emoji : '🗑️';
-                const colorDisplay = t ? t.cor : '#cccccc';
-                const descHtml = d.descricao ? `<div style="font-weight:bold; color:var(--fju-azul-claro); margin-top:2px;">📝 ${d.descricao}</div>` : '';
-
-                return `<div class="tribo-card" style="border-left-color:${colorDisplay}">
-                    <div class="info">
-                        <div class="nome">${emojiDisplay} ${nomeDisplay}</div>
-                        <div class="detalhe"><span class="badge-semana">${d.semana}</span> ${fmtData(d.data)}</div>
-                        ${descHtml}
-                    </div>
-                    <div class="acoes"><div class="pontos">+${fmtStr(d.pontos)}</div><button type="button" class="btn-mini" onclick="removerPonto(${d.id})">Apagar</button></div>
-                </div>`;
-            }).join('');
         }
 
-        // ================= RELATÓRIOS E EXPORTAÇÃO =================
-        function copiarTexto() {
+        window.copiarTexto = function() {
             const visaoAtiva = document.getElementById('visaoPlacar').value;
             const tribosVisiveis = CONFIG.tribos.filter(t => !t.oculta);
             const tribosRender = visaoAtiva === 'ALL' ? tribosVisiveis : tribosVisiveis.filter(t => t.id === visaoAtiva);
@@ -746,7 +755,7 @@
             compartilharViaCelular(m);
         }
 
-        function copiarRelatorioCompleto() {
+        window.copiarRelatorioCompleto = function() {
             if(dados.length === 0) return mostrarToast('Nenhum dado para o relatório.', '⚠️');
             const tribosVisiveis = CONFIG.tribos.filter(t => !t.oculta);
             const idsVisiveis = tribosVisiveis.map(t => t.id);
@@ -779,7 +788,7 @@
             compartilharViaCelular(m);
         }
 
-        function exportarRelatorioCSV() {
+        window.exportarRelatorioCSV = function() {
             if(dados.length === 0) return mostrarToast('Sem dados para exportar!', '⚠️');
             let csv = `RELATÓRIO FINAL - ${CONFIG.tituloNacao.toUpperCase()}\n`;
             csv += `Tema: ${CONFIG.tema}\n`;
@@ -815,14 +824,13 @@
             mostrarToast('Relatório Excel baixado!', '📊');
         }
 
-        function salvarDadosJSON() {
+        window.salvarDadosJSON = function() {
             if(dados.length===0) return mostrarToast('Sem dados!','⚠️');
             const url = URL.createObjectURL(new Blob([JSON.stringify({dados, CONFIG, fotosTribos, arteUrl, bannerMainUrl, logoFjuUrl},null,2)], {type:'application/json'}));
             const a = document.createElement('a'); a.href=url; a.download=`backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); mostrarToast('Backup Salvo!','💾');
         }
 
-        // Gerar Imagem
-        function gerarImagem() {
+        window.gerarImagem = function() {
             if(dados.length === 0) return mostrarToast('Sem dados para gerar imagem!', '⚠️');
             const btn = document.getElementById('btnImg'); btn.textContent = '⏳ ...';
 
@@ -870,7 +878,7 @@
             const somaG = dados.filter(d => idsRender.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0);
             const somaS = semanaAtiva !== 'Geral' ? dados.filter(d=>d.semana===semanaAtiva && idsRender.includes(d.triboId)).reduce((a,b)=>a+b.pontos,0) : 0;
             
-            let labelGeral = visaoAtiva === 'ALL' ? '🏆 Total Geral Arrecadado' : '🏆 Total da Tribo';
+            let labelGeral = visaoAtiva === 'ALL' ? '🏆 Total Geral' : '🏆 Total da Tribo';
             let labelDesempenho = visaoAtiva === 'ALL' ? '📊 RESULTADO DAS TRIBOS' : '📊 DESEMPENHO DA TRIBO';
 
             let totH = `<div style="font-size:1.1em;color:#8ab4f8;text-transform:uppercase;letter-spacing:2px;font-weight:bold;">${labelGeral}</div><div style="font-size:3.5em;font-weight:900;color:var(--fju-amarelo);margin-top:5px;text-shadow:0 4px 10px rgba(0,0,0,0.5);">${fmtStr(somaG)} pts</div>`;
@@ -893,7 +901,7 @@
                     </div>
                     
                     <div style="margin:20px 0;">
-                        <h2 style="text-align:center;font-size:1.4em;color:${CORES_FJU.amarelo};margin-bottom:15px;text-transform:uppercase;">${labelDesempenho}</h2>
+                        <h2 style="text-align:center;font-size:1.4em;color:var(--fju-amarelo);margin-bottom:15px;text-transform:uppercase;">${labelDesempenho}</h2>
                         ${trH}
                     </div>
 
